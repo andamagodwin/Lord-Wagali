@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
 import { Button } from '@/components/Button';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -82,25 +82,23 @@ export default function ManageFree() {
   };
 
   return (
-    <KeyboardAvoidingView
-      className="flex-1"
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <View className="flex-1 bg-slate-50">
-        <SafeAreaView edges={['top']} className="bg-[#18152e]">
-          <View className="flex-row items-center px-5 pb-4 pt-3">
-            <TouchableOpacity onPress={() => router.back()} className="mr-3">
-              <Ionicons name="arrow-back" size={22} color="white" />
-            </TouchableOpacity>
-            <Text className="text-lg font-black tracking-tight text-white">Manage Free Tips</Text>
-          </View>
-        </SafeAreaView>
+    <View className="flex-1 bg-slate-50">
+      <SafeAreaView edges={['top']} className="bg-[#18152e]">
+        <View className="flex-row items-center px-5 pb-4 pt-3">
+          <TouchableOpacity onPress={() => router.back()} className="mr-3">
+            <Ionicons name="arrow-back" size={22} color="white" />
+          </TouchableOpacity>
+          <Text className="text-lg font-black tracking-tight text-white">Manage Free Tips</Text>
+        </View>
+      </SafeAreaView>
 
-        <ScrollView
-          className="flex-1"
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 40 }}
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode="interactive">
+      <ScrollView
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 40 }}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
+        automaticallyAdjustKeyboardInsets>
         <View className="px-5 pt-5">
           {/* Active Tips */}
           {tips.length === 0 ? (
@@ -267,18 +265,17 @@ export default function ManageFree() {
         </View>
       </ScrollView>
 
-        <TeamBadgePicker
-          visible={pickerTarget !== null}
-          onClose={() => setPickerTarget(null)}
-          onSelect={(team) => {
-            if (pickerTarget === 'home') {
-              setForm({ ...form, homeLogo: team.id, home: form.home || team.name });
-            } else {
-              setForm({ ...form, awayLogo: team.id, away: form.away || team.name });
-            }
-          }}
-        />
-      </View>
-    </KeyboardAvoidingView>
+      <TeamBadgePicker
+        visible={pickerTarget !== null}
+        onClose={() => setPickerTarget(null)}
+        onSelect={(team) => {
+          if (pickerTarget === 'home') {
+            setForm({ ...form, homeLogo: team.id, home: form.home || team.name });
+          } else {
+            setForm({ ...form, awayLogo: team.id, away: form.away || team.name });
+          }
+        }}
+      />
+    </View>
   );
 }
