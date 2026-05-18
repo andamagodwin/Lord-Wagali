@@ -32,7 +32,7 @@ export default function Home() {
 
   const shareApp = () =>
     Share.share({
-      message: `Join AlphaWins for daily accurate games! 🏆⚽ Download the app here: ${DOWNLOAD_LINK}`,
+      message: `Join ElitePicks for daily accurate games! 🏆⚽ Download the app here: ${DOWNLOAD_LINK}`,
     });
 
   return (
@@ -54,7 +54,7 @@ export default function Home() {
             </TouchableOpacity>
             <View className="ml-4">
               <Text className="text-3xl font-black uppercase tracking-tighter text-white">
-                AlphaWins
+                ElitePicks
               </Text>
               <View className="mt-1 self-start rounded-lg bg-gold-500 px-2 py-0.5">
                 <Text className="text-[9px] font-black uppercase italic tracking-widest text-navy-950">
@@ -199,7 +199,7 @@ export default function Home() {
             className="flex-row items-center justify-center rounded-[44px] bg-green-600 p-6 shadow-2xl shadow-green-600/30">
             <FontAwesome name="whatsapp" size={24} color="white" />
             <Text className="ml-4 text-xl font-black tracking-tighter text-white">
-              Contact AlphaWins
+              Contact ElitePicks
             </Text>
           </TouchableOpacity>
 
@@ -207,7 +207,7 @@ export default function Home() {
             onLongPress={() => router.push('/admin')}
             className="mt-10 items-center py-6 opacity-20">
             <Text className="text-[10px] font-black uppercase tracking-widest text-navy-950">
-              © AlphaWins Accurate Games • {new Date().getFullYear()}
+              © ElitePicks Accurate Games • {new Date().getFullYear()}
             </Text>
           </TouchableOpacity>
         </View>

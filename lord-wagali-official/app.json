@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Lord Wagali Official",
-    "slug": "lord-wagali-official",
+    "name": "ElitePicks",
+    "slug": "elite-picks",
     "version": "1.0.0",
 
     "scheme": "app",
@@ -26,18 +26,19 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#08111f"
     },
     "assetBundlePatterns": ["**/*"],
-    "ios": {
-      "supportsTablet": true
-    },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#08111f"
       },
-      "package": "com.modu.app"
+      "package": "com.elitepicks.app"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.elitepicks.app"
     }
   }
 }

@@ -2,16 +2,13 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Share, Linking, Switch } from 'react-native';
 import { Container } from '@/components/Container';
 import { Ionicons, FontAwesome } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 
 const DOWNLOAD_LINK = 'https://www.mediafire.com/folder/lvoiimmjhifd9/AlphaWins';
 
 export default function Settings() {
-  const router = useRouter();
-
   const shareApp = () =>
     Share.share({
-      message: `Join AlphaWins for daily accurate games! 🏆⚽ Download the app here: ${DOWNLOAD_LINK}`,
+      message: `Join ElitePicks for daily accurate games! 🏆⚽ Download the app here: ${DOWNLOAD_LINK}`,
     });
 
   return (
@@ -79,7 +76,7 @@ export default function Settings() {
               Invite Friend
             </Text>
             <Text className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-              Share AlphaWins
+              Share ElitePicks
             </Text>
           </View>
           <Ionicons name="chevron-forward" size={20} color="#cbd5e1" />

@@ -1,6 +1,8 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { create } from 'zustand';
 import { apiRequest } from '@/lib/api';
+import { useToastStore } from '@/stores/useToastStore';
 
 export interface Stat {
   label: string;
@@ -65,7 +67,9 @@ interface TipsContextType {
   resetAllData: () => Promise<void>;
 }
 
-const TipsContext = createContext<TipsContextType | undefined>(undefined);
+interface TipsStore extends TipsContextType {
+  hydrate: () => Promise<void>;
+}
 
 type ApiMatch = {
   id: string;
@@ -323,201 +327,219 @@ async function readStoredClientId() {
   return generatedId;
 }
 
-export function TipsProvider({ children }: { children: React.ReactNode }) {
-  const [tips, setTips] = useState<Tip[]>(INITIAL_FREE_TIPS);
-  const [vipTips, setVipTips] = useState<Tip[]>(INITIAL_VIP_TIPS);
-  const [history, setHistory] = useState<HistoryTip[]>(INITIAL_HISTORY);
-  const [authorizedIds, setAuthorizedIds] = useState<string[]>(['AW-9090']);
-  const [clientUserId, setClientUserId] = useState<string>('');
-  const [clientIsVip, setClientIsVip] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+function showToast(title: string, message: string, variant: 'success' | 'error' | 'info' = 'info') {
+  useToastStore.getState().showToast({ title, message, variant });
+}
 
-  const getClientId = async () => clientUserId || readStoredClientId();
+function showErrorToast(title: string, error: unknown) {
+  const message = error instanceof Error ? error.message : 'Something went wrong.';
+  showToast(title, message, 'error');
+}
 
-  const syncClientAccess = async (deviceId: string) => {
-    const access = await apiRequest<{ deviceId: string; isVip: boolean; exists: boolean }>(
-      `/api/v1/access/me/${encodeURIComponent(deviceId)}`
-    );
-    setClientIsVip(access.isVip);
-  };
+export const useTipsStore = create<TipsStore>((set, get) => ({
+  tips: INITIAL_FREE_TIPS,
+  vipTips: INITIAL_VIP_TIPS,
+  history: INITIAL_HISTORY,
+  authorizedIds: ['AW-9090'],
+  clientUserId: '',
+  clientIsVip: false,
+  isLoading: true,
+  hydrate: async () => {
+    set({ isLoading: true });
 
-  const refreshData = async (deviceId: string) => {
-    const [freeTipsResponse, vipTipsResponse, historyResponse, authorizedResponse] =
-      await Promise.allSettled([
-        apiRequest<ApiMatch[]>('/api/v1/tips/free'),
-        apiRequest<ApiMatch[]>('/api/v1/tips/vip'),
-        apiRequest<ApiMatch[]>('/api/v1/tips/history'),
-        apiRequest<Array<{ deviceId: string }>>('/api/v1/access/authorized', { admin: true }),
-      ]);
+    try {
+      const deviceId = await readStoredClientId();
+      set({ clientUserId: deviceId });
 
-    if (freeTipsResponse.status === 'fulfilled') {
-      setTips(freeTipsResponse.value.map(mapTip));
-    }
+      const [freeTipsResponse, vipTipsResponse, historyResponse, authorizedResponse] =
+        await Promise.allSettled([
+          apiRequest<ApiMatch[]>('/api/v1/tips/free'),
+          apiRequest<ApiMatch[]>('/api/v1/tips/vip'),
+          apiRequest<ApiMatch[]>('/api/v1/tips/history'),
+          apiRequest<{ deviceId: string }[]>('/api/v1/access/authorized', { admin: true }),
+        ]);
 
-    if (vipTipsResponse.status === 'fulfilled') {
-      setVipTips(vipTipsResponse.value.map(mapTip));
-    }
-
-    if (historyResponse.status === 'fulfilled') {
-      setHistory(historyResponse.value.map(mapHistory));
-    }
-
-    if (authorizedResponse.status === 'fulfilled') {
-      setAuthorizedIds(authorizedResponse.value.map((item) => item.deviceId));
-    }
-
-    await syncClientAccess(deviceId);
-  };
-
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const deviceId = await readStoredClientId();
-        setClientUserId(deviceId);
-        await refreshData(deviceId);
-      } catch (error) {
-        console.warn('Failed to sync backend data, falling back to local seed data', error);
-        setTips(INITIAL_FREE_TIPS);
-        setVipTips(INITIAL_VIP_TIPS);
-        setHistory(INITIAL_HISTORY);
-        setAuthorizedIds(['AW-9090']);
-        const fallbackId = await readStoredClientId();
-        setClientUserId(fallbackId);
-      } finally {
-        setIsLoading(false);
+      if (freeTipsResponse.status === 'fulfilled') {
+        set({ tips: freeTipsResponse.value.map(mapTip) });
       }
-    }
 
-    void loadData();
+      if (vipTipsResponse.status === 'fulfilled') {
+        set({ vipTips: vipTipsResponse.value.map(mapTip) });
+      }
+
+      if (historyResponse.status === 'fulfilled') {
+        set({ history: historyResponse.value.map(mapHistory) });
+      }
+
+      if (authorizedResponse.status === 'fulfilled') {
+        set({ authorizedIds: authorizedResponse.value.map((item) => item.deviceId) });
+      }
+
+      try {
+        const access = await apiRequest<{ deviceId: string; isVip: boolean; exists: boolean }>(
+          `/api/v1/access/me/${encodeURIComponent(deviceId)}`
+        );
+        set({ clientIsVip: access.isVip });
+      } catch (error) {
+        showErrorToast('VIP status unavailable', error);
+      }
+    } catch (error) {
+      showErrorToast('Unable to sync data', error);
+      const fallbackId = await readStoredClientId();
+      set({
+        tips: INITIAL_FREE_TIPS,
+        vipTips: INITIAL_VIP_TIPS,
+        history: INITIAL_HISTORY,
+        authorizedIds: ['AW-9090'],
+        clientUserId: fallbackId,
+        clientIsVip: false,
+      });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  addFreeTip: async (tip) => {
+    try {
+      await apiRequest('/api/v1/tips', {
+        method: 'POST',
+        admin: true,
+        body: JSON.stringify({ segment: 'free', tip }),
+      });
+      await get().hydrate();
+      showToast('Free tip published', `${tip.home} vs ${tip.away} is now live.`, 'success');
+    } catch (error) {
+      showErrorToast('Failed to add free tip', error);
+      throw error;
+    }
+  },
+  removeFreeTip: async (id) => {
+    try {
+      await apiRequest(`/api/v1/tips/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        admin: true,
+      });
+      await get().hydrate();
+      showToast('Free tip removed', 'The tip was deleted successfully.', 'success');
+    } catch (error) {
+      showErrorToast('Failed to remove free tip', error);
+      throw error;
+    }
+  },
+  addVipTip: async (tip) => {
+    try {
+      await apiRequest('/api/v1/tips', {
+        method: 'POST',
+        admin: true,
+        body: JSON.stringify({ segment: 'vip', tip }),
+      });
+      await get().hydrate();
+      showToast('VIP tip published', `${tip.home} vs ${tip.away} is now live.`, 'success');
+    } catch (error) {
+      showErrorToast('Failed to add VIP tip', error);
+      throw error;
+    }
+  },
+  removeVipTip: async (id) => {
+    try {
+      await apiRequest(`/api/v1/tips/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        admin: true,
+      });
+      await get().hydrate();
+      showToast('VIP tip removed', 'The premium tip was deleted successfully.', 'success');
+    } catch (error) {
+      showErrorToast('Failed to remove VIP tip', error);
+      throw error;
+    }
+  },
+  settleTip: async (id, _isVip, status) => {
+    try {
+      await apiRequest(`/api/v1/tips/${encodeURIComponent(id)}/settle`, {
+        method: 'POST',
+        admin: true,
+        body: JSON.stringify({ status }),
+      });
+      await get().hydrate();
+      showToast('Match settled', `Recorded as ${status.toUpperCase()}.`, 'success');
+    } catch (error) {
+      showErrorToast('Failed to settle match', error);
+      throw error;
+    }
+  },
+  authorizeUserId: async (userId) => {
+    const cleanId = userId.trim().toUpperCase();
+    try {
+      await apiRequest('/api/v1/access/authorize', {
+        method: 'POST',
+        admin: true,
+        body: JSON.stringify({ deviceId: cleanId }),
+      });
+      await get().hydrate();
+      showToast('Access granted', `${cleanId} is now authorized.`, 'success');
+    } catch (error) {
+      showErrorToast('Failed to authorize user', error);
+      throw error;
+    }
+  },
+  deauthorizeUserId: async (userId) => {
+    const cleanId = userId.trim().toUpperCase();
+    try {
+      await apiRequest(`/api/v1/access/authorize/${encodeURIComponent(cleanId)}`, {
+        method: 'DELETE',
+        admin: true,
+      });
+      await get().hydrate();
+      showToast('Access removed', `${cleanId} was removed from the list.`, 'success');
+    } catch (error) {
+      showErrorToast('Failed to revoke access', error);
+      throw error;
+    }
+  },
+  activateVipOnClient: async (userIdInput) => {
+    const cleanId = userIdInput.trim().toUpperCase();
+    try {
+      const response = await apiRequest<{ deviceId: string; isVip: boolean }>(
+        '/api/v1/access/activate',
+        {
+          method: 'POST',
+          body: JSON.stringify({ deviceId: cleanId }),
+        }
+      );
+
+      set({ clientIsVip: response.isVip });
+      await get().hydrate();
+
+      if (response.isVip) {
+        showToast('VIP activated', 'Premium access is now unlocked.', 'success');
+      }
+
+      return response.isVip;
+    } catch (error) {
+      showErrorToast('VIP activation failed', error);
+      return false;
+    }
+  },
+  resetAllData: async () => {
+    try {
+      await apiRequest('/api/v1/admin/reset', {
+        method: 'POST',
+        admin: true,
+      });
+      await get().hydrate();
+      showToast('System reset', 'All data has been restored to defaults.', 'success');
+    } catch (error) {
+      showErrorToast('Failed to reset data', error);
+      throw error;
+    }
+  },
+}));
+
+export function TipsProvider({ children }: { children: React.ReactNode }) {
+  useEffect(() => {
+    void useTipsStore.getState().hydrate();
   }, []);
 
-  const addFreeTip = async (tip: Omit<Tip, 'id'>) => {
-    const deviceId = await getClientId();
-    await apiRequest('/api/v1/tips', {
-      method: 'POST',
-      admin: true,
-      body: JSON.stringify({
-        segment: 'free',
-        tip,
-      }),
-    });
-    await refreshData(deviceId);
-  };
-
-  const removeFreeTip = async (id: string) => {
-    const deviceId = await getClientId();
-    await apiRequest(`/api/v1/tips/${encodeURIComponent(id)}`, {
-      method: 'DELETE',
-      admin: true,
-    });
-    await refreshData(deviceId);
-  };
-
-  const addVipTip = async (tip: Omit<Tip, 'id'>) => {
-    const deviceId = await getClientId();
-    await apiRequest('/api/v1/tips', {
-      method: 'POST',
-      admin: true,
-      body: JSON.stringify({
-        segment: 'vip',
-        tip,
-      }),
-    });
-    await refreshData(deviceId);
-  };
-
-  const removeVipTip = async (id: string) => {
-    const deviceId = await getClientId();
-    await apiRequest(`/api/v1/tips/${encodeURIComponent(id)}`, {
-      method: 'DELETE',
-      admin: true,
-    });
-    await refreshData(deviceId);
-  };
-
-  const settleTip = async (id: string, _isVip: boolean, status: 'won' | 'lost') => {
-    const deviceId = await getClientId();
-    await apiRequest(`/api/v1/tips/${encodeURIComponent(id)}/settle`, {
-      method: 'POST',
-      admin: true,
-      body: JSON.stringify({ status }),
-    });
-    await refreshData(deviceId);
-  };
-
-  const authorizeUserId = async (userId: string) => {
-    const cleanId = userId.trim().toUpperCase();
-    const deviceId = await getClientId();
-    await apiRequest('/api/v1/access/authorize', {
-      method: 'POST',
-      admin: true,
-      body: JSON.stringify({ deviceId: cleanId }),
-    });
-    await refreshData(deviceId);
-  };
-
-  const deauthorizeUserId = async (userId: string) => {
-    const cleanId = userId.trim().toUpperCase();
-    const deviceId = await getClientId();
-    await apiRequest(`/api/v1/access/authorize/${encodeURIComponent(cleanId)}`, {
-      method: 'DELETE',
-      admin: true,
-    });
-    await refreshData(deviceId);
-  };
-
-  const activateVipOnClient = async (userIdInput: string) => {
-    const cleanId = userIdInput.trim().toUpperCase();
-    const response = await apiRequest<{ deviceId: string; isVip: boolean }>(
-      '/api/v1/access/activate',
-      {
-        method: 'POST',
-        body: JSON.stringify({ deviceId: cleanId }),
-      }
-    );
-    setClientIsVip(response.isVip);
-    await refreshData(cleanId);
-    return response.isVip;
-  };
-
-  const resetAllData = async () => {
-    const deviceId = await getClientId();
-    await apiRequest('/api/v1/admin/reset', {
-      method: 'POST',
-      admin: true,
-    });
-    await refreshData(deviceId);
-  };
-
-  return (
-    <TipsContext.Provider
-      value={{
-        tips,
-        vipTips,
-        history,
-        authorizedIds,
-        clientUserId,
-        clientIsVip,
-        isLoading,
-        addFreeTip,
-        removeFreeTip,
-        addVipTip,
-        removeVipTip,
-        settleTip,
-        authorizeUserId,
-        deauthorizeUserId,
-        activateVipOnClient,
-        resetAllData,
-      }}>
-      {children}
-    </TipsContext.Provider>
-  );
+  return <>{children}</>;
 }
 
-export function useTips() {
-  const context = useContext(TipsContext);
-  if (!context) {
-    throw new Error('useTips must be used within a TipsProvider');
-  }
-  return context;
-}
+export const useTips = useTipsStore;

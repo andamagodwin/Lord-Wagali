@@ -203,7 +203,7 @@ export default function Analysis() {
               <Ionicons name="ribbon" size={20} color="black" />
             </View>
             <Text className="text-lg font-black uppercase tracking-widest text-gold-600">
-              AlphaWins Verdict
+              ElitePicks Verdict
             </Text>
           </View>
           <Text className="text-sm font-medium italic leading-7 text-slate-600">
