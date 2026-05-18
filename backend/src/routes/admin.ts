@@ -19,3 +19,4 @@ adminRouter.post('/reset', requireAdminKey, asyncHandler(async (_req, res) => {
 
   res.json({ ok: true });
 }));
+
