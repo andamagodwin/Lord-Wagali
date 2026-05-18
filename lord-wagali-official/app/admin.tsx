@@ -8,6 +8,8 @@ import {
   TextInput,
   Share,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { Button } from '@/components/Button';
 import { Ionicons } from '@expo/vector-icons';
@@ -85,59 +87,67 @@ export default function AdminDashboard() {
 
   if (!isAdmin) {
     return (
-      <View className="flex-1 bg-slate-50">
-        <SafeAreaView edges={['top']} className="bg-[#18152e]">
-          <View className="flex-row items-center px-5 pb-4 pt-3">
-            <TouchableOpacity onPress={() => router.back()} className="mr-3">
-              <Ionicons name="arrow-back" size={22} color="white" />
-            </TouchableOpacity>
-            <Text className="text-lg font-black tracking-tight text-white">Admin</Text>
-          </View>
-        </SafeAreaView>
-
-        <View className="flex-1 items-center justify-center px-8">
-          <View className="w-full items-center rounded-2xl border border-slate-100 bg-white p-8 shadow-sm">
-            <View className="mb-5 h-16 w-16 items-center justify-center rounded-2xl bg-navy-950">
-              <Ionicons name="lock-closed" size={28} color="white" />
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <View className="flex-1 bg-slate-50">
+          <SafeAreaView edges={['top']} className="bg-[#18152e]">
+            <View className="flex-row items-center px-5 pb-4 pt-3">
+              <TouchableOpacity onPress={() => router.back()} className="mr-3">
+                <Ionicons name="arrow-back" size={22} color="white" />
+              </TouchableOpacity>
+              <Text className="text-lg font-black tracking-tight text-white">Admin</Text>
             </View>
-            <Text className="mb-1 text-lg font-bold text-navy-950">Admin Access</Text>
-            <Text className="mb-6 text-xs text-slate-400">Enter your PIN to continue</Text>
+          </SafeAreaView>
 
-            <TextInput
-              className="mb-5 w-full rounded-xl border border-slate-200 bg-slate-50 p-4 text-center text-2xl font-bold tracking-[8px] text-navy-950"
-              placeholder="****"
-              placeholderTextColor="#cbd5e1"
-              secureTextEntry
-              keyboardType="numeric"
-              maxLength={4}
-              value={pass}
-              onChangeText={setPass}
-            />
+          <View className="flex-1 items-center justify-center px-8">
+            <View className="w-full items-center rounded-2xl border border-slate-100 bg-white p-8 shadow-sm">
+              <View className="mb-5 h-16 w-16 items-center justify-center rounded-2xl bg-navy-950">
+                <Ionicons name="lock-closed" size={28} color="white" />
+              </View>
+              <Text className="mb-1 text-lg font-bold text-navy-950">Admin Access</Text>
+              <Text className="mb-6 text-xs text-slate-400">Enter your PIN to continue</Text>
 
-            <Button title="UNLOCK" variant="primary" onPress={handleLogin} />
+              <TextInput
+                className="mb-5 w-full rounded-xl border border-slate-200 bg-slate-50 p-4 text-center text-2xl font-bold tracking-[8px] text-navy-950"
+                placeholder="****"
+                placeholderTextColor="#cbd5e1"
+                secureTextEntry
+                keyboardType="numeric"
+                maxLength={4}
+                value={pass}
+                onChangeText={setPass}
+              />
+
+              <Button title="UNLOCK" variant="primary" onPress={handleLogin} />
+            </View>
           </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     );
   }
 
   if (view === 'vip-manage') {
     return (
-      <View className="flex-1 bg-slate-50">
-        <SafeAreaView edges={['top']} className="bg-[#18152e]">
-          <View className="flex-row items-center px-5 pb-4 pt-3">
-            <TouchableOpacity onPress={() => setView('main')} className="mr-3">
-              <Ionicons name="arrow-back" size={22} color="white" />
-            </TouchableOpacity>
-            <Text className="text-lg font-black tracking-tight text-white">Manage Access</Text>
-          </View>
-        </SafeAreaView>
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <View className="flex-1 bg-slate-50">
+          <SafeAreaView edges={['top']} className="bg-[#18152e]">
+            <View className="flex-row items-center px-5 pb-4 pt-3">
+              <TouchableOpacity onPress={() => setView('main')} className="mr-3">
+                <Ionicons name="arrow-back" size={22} color="white" />
+              </TouchableOpacity>
+              <Text className="text-lg font-black tracking-tight text-white">Manage Access</Text>
+            </View>
+          </SafeAreaView>
 
-        <ScrollView
-          className="flex-1"
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 40 }}
-          keyboardShouldPersistTaps="handled">
+          <ScrollView
+            className="flex-1"
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 40 }}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="interactive">
           <View className="px-5 pt-5">
             {/* Grant Access */}
             <View className="mb-5 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
@@ -190,8 +200,9 @@ export default function AdminDashboard() {
               ))
             )}
           </View>
-        </ScrollView>
-      </View>
+          </ScrollView>
+        </View>
+      </KeyboardAvoidingView>
     );
   }
 

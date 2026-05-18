@@ -9,6 +9,8 @@ import {
   TextInput,
   ActivityIndicator,
   RefreshControl,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { Button } from '@/components/Button';
 import { Ionicons, FontAwesome } from '@expo/vector-icons';
@@ -155,21 +157,26 @@ export default function VIP() {
 
   // Non-VIP: Payment & Activation flow
   return (
-    <View className="flex-1 bg-slate-50">
-      <SafeAreaView edges={['top']} className="bg-[#18152e]">
-        <View className="items-center px-5 pb-5 pt-3">
-          <Text className="text-lg font-black tracking-tight text-white">VIP Access</Text>
-          <Text className="mt-0.5 text-[10px] font-medium text-gold-400">
-            Premium Predictions
-          </Text>
-        </View>
-      </SafeAreaView>
+    <KeyboardAvoidingView
+      className="flex-1"
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}>
+      <View className="flex-1 bg-slate-50">
+        <SafeAreaView edges={['top']} className="bg-[#18152e]">
+          <View className="items-center px-5 pb-5 pt-3">
+            <Text className="text-lg font-black tracking-tight text-white">VIP Access</Text>
+            <Text className="mt-0.5 text-[10px] font-medium text-gold-400">
+              Premium Predictions
+            </Text>
+          </View>
+        </SafeAreaView>
 
-      <ScrollView
-        className="flex-1"
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 40 }}
-        keyboardShouldPersistTaps="handled">
+        <ScrollView
+          className="flex-1"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 40 }}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive">
         <View className="px-5 pt-6">
           {/* Step 1: Payment */}
           <View className="mb-5 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
@@ -259,8 +266,9 @@ export default function VIP() {
             )}
           </View>
         </View>
-      </ScrollView>
-    </View>
+        </ScrollView>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
