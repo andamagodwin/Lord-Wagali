@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TipSegment {
+  FREE
+  VIP
+}
+
+enum TipStatus {
+  ACTIVE
+  WON
+  LOST
+}
+
+model Match {
+  id         String     @id
+  segment    TipSegment
+  home       String
+  away       String
+  homeLogo   String
+  awayLogo   String
+  tip        String
+  odds       String
+  prob       String
+  league     String
+  time       String
+  summary    String?
+  winProb    Json?
+  stats      Json?
+  form       Json?
+  h2h        Json?
+  status     TipStatus  @default(ACTIVE)
+  settledAt  DateTime?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
+model DeviceAccess {
+  deviceId   String   @id
+  isVip      Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
