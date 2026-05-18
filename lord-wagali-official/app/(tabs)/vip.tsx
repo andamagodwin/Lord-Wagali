@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
+  ScrollView,
   TouchableOpacity,
   Alert,
   Linking,
@@ -9,14 +10,13 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from 'react-native';
-import { Container } from '@/components/Container';
 import { Button } from '@/components/Button';
 import { Ionicons, FontAwesome } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
 import { useTips } from '@/context/TipsContext';
 import { getTeamLogo } from './index';
-import { KeyboardAwareScreen } from '@/components/KeyboardAwareScreen';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { WHATSAPP_NUMBER, PAYMENT_NUMBER } from '@/lib/constants';
 
 export default function VIP() {
@@ -60,234 +60,265 @@ export default function VIP() {
 
   if (isLoading && !refreshing) {
     return (
-      <Container className="items-center justify-center bg-slate-50">
-        <ActivityIndicator size="large" color="#df8d38" />
-        <Text className="mt-4 text-xs font-bold uppercase tracking-widest text-slate-400">
-          Checking VIP System...
-        </Text>
-      </Container>
+      <View className="flex-1 items-center justify-center bg-slate-50">
+        <ActivityIndicator size="large" color="#18152e" />
+        <Text className="mt-3 text-xs font-medium text-slate-400">Checking VIP status...</Text>
+      </View>
     );
   }
 
   if (clientIsVip) {
     return (
-      <KeyboardAwareScreen
-        className="bg-slate-50"
-        contentClassName="px-4 pt-6"
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor="#fbbf24"
-            colors={['#fbbf24']}
-          />
-        }>
-        <View className="mb-8 flex-row items-center justify-between rounded-[44px] bg-navy-950 p-8 shadow-2xl">
-          <View>
-            <Text className="text-2xl font-black uppercase tracking-tighter text-gold-400">
-              VIP Active
-            </Text>
-            <Text className="mt-1 text-[10px] font-bold uppercase tracking-widest text-white/40">
-              ID: {clientUserId}
-            </Text>
+      <View className="flex-1 bg-slate-50">
+        <SafeAreaView edges={['top']} className="bg-[#18152e]">
+          <View className="flex-row items-center justify-between px-5 pb-4 pt-3">
+            <View>
+              <Text className="text-lg font-black tracking-tight text-white">VIP Room</Text>
+              <Text className="text-[9px] font-medium uppercase tracking-widest text-green-400">
+                Active • {clientUserId}
+              </Text>
+            </View>
+            <View className="rounded-xl bg-green-500/20 p-2">
+              <Ionicons name="shield-checkmark" size={22} color="#4ade80" />
+            </View>
           </View>
-          <View className="rounded-3xl border border-green-500/10 bg-green-500/20 p-3">
-            <Ionicons name="shield-checkmark" size={32} color="#4ade80" />
-          </View>
-        </View>
+        </SafeAreaView>
 
-        <Text className="mb-6 px-2 text-3xl font-black uppercase tracking-tighter text-navy-950">
-          Daily Accurate Games
-        </Text>
-
-        {vipTips.length === 0 ? (
-          <View className="mb-8 items-center justify-center rounded-[44px] border border-slate-200 bg-white p-10 py-16 shadow-xl">
-            <Ionicons name="shield-outline" size={36} color="#fbbf24" />
-            <Text className="mt-4 text-lg font-black uppercase tracking-tighter text-navy-950">
-              Analyzing VIP Fixtures
-            </Text>
-            <Text className="mt-1 text-center text-xs font-medium text-slate-400">
-              Elite fixed games are being carefully computed. Check back shortly!
-            </Text>
-          </View>
-        ) : (
-          vipTips.map((item) => (
-            <VIPMatchCard
-              key={item.id}
-              home={item.home}
-              away={item.away}
-              tip={item.tip}
-              odds={item.odds}
-              homeId={item.homeLogo}
-              awayId={item.awayLogo}
-              time={item.time}
+        <ScrollView
+          className="flex-1"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 24 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#fbbf24"
+              colors={['#fbbf24']}
             />
-          ))
-        )}
+          }>
+          <View className="px-5 pt-5">
+            {vipTips.length === 0 ? (
+              <View className="items-center justify-center rounded-2xl border border-slate-100 bg-white p-10 shadow-sm">
+                <Ionicons name="shield-outline" size={36} color="#fbbf24" />
+                <Text className="mt-4 text-base font-bold text-navy-950">
+                  Analyzing VIP Fixtures
+                </Text>
+                <Text className="mt-1 text-center text-xs text-slate-400">
+                  Elite picks are being computed. Check back shortly.
+                </Text>
+              </View>
+            ) : (
+              <>
+                {vipTips.map((item) => (
+                  <VIPMatchCard
+                    key={item.id}
+                    home={item.home}
+                    away={item.away}
+                    tip={item.tip}
+                    odds={item.odds}
+                    homeId={item.homeLogo}
+                    awayId={item.awayLogo}
+                    time={item.time}
+                    league={item.league}
+                  />
+                ))}
 
-        {vipTips.length > 0 && (
-          <View className="mb-12 mt-4 items-center rounded-[48px] border border-slate-200 bg-white p-10 shadow-xl">
-            <Text className="text-4xl font-black tracking-tighter text-gold-500">
-              {vipTips.reduce((acc, curr) => acc * parseFloat(curr.odds || '1'), 1).toFixed(2)} Odds
-            </Text>
-            <Text className="mt-2 text-[11px] font-black uppercase italic tracking-widest text-slate-400">
-              Premium Master Selection
-            </Text>
+                <View className="mt-2 items-center rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+                  <Text className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                    Combined Odds
+                  </Text>
+                  <Text className="mt-1 text-3xl font-black tracking-tight text-gold-500">
+                    {vipTips
+                      .reduce((acc, curr) => acc * parseFloat(curr.odds || '1'), 1)
+                      .toFixed(2)}
+                  </Text>
+                </View>
+              </>
+            )}
+
+            <TouchableOpacity
+              onPress={() =>
+                Linking.openURL(
+                  `whatsapp://send?phone=256${WHATSAPP_NUMBER.slice(1)}&text=I have a question about today's VIP picks.`
+                )
+              }
+              activeOpacity={0.8}
+              className="mt-6 flex-row items-center justify-center rounded-2xl border border-green-100 bg-green-50 p-4">
+              <FontAwesome name="whatsapp" size={18} color="#16a34a" />
+              <Text className="ml-3 text-sm font-bold text-green-700">VIP Support</Text>
+            </TouchableOpacity>
           </View>
-        )}
-
-        <TouchableOpacity
-          onPress={() =>
-            Linking.openURL(
-              `whatsapp://send?phone=256${WHATSAPP_NUMBER.slice(1)}&text=I have a question about today's VIP picks.`
-            )
-          }
-          className="mb-20 flex-row items-center justify-center rounded-[48px] border border-green-200 bg-green-600/10 p-8 shadow-sm">
-          <FontAwesome name="whatsapp" size={32} color="#16a34a" />
-          <Text className="ml-4 text-xl font-black uppercase tracking-tight text-green-600">
-            VIP Support
-          </Text>
-        </TouchableOpacity>
-      </KeyboardAwareScreen>
+        </ScrollView>
+      </View>
     );
   }
 
+  // Non-VIP: Payment & Activation flow
   return (
-    <KeyboardAwareScreen className="bg-slate-50" contentClassName="px-5 pt-4">
-      <View className="items-center py-12">
-        <View className="mb-8 h-28 w-28 items-center justify-center rounded-[40px] bg-gold-500 shadow-2xl shadow-gold-500/50">
-          <Ionicons name="lock-closed" size={56} color="#000" />
+    <View className="flex-1 bg-slate-50">
+      <SafeAreaView edges={['top']} className="bg-[#18152e]">
+        <View className="items-center px-5 pb-5 pt-3">
+          <Text className="text-lg font-black tracking-tight text-white">VIP Access</Text>
+          <Text className="mt-0.5 text-[10px] font-medium text-gold-400">
+            Premium Predictions
+          </Text>
         </View>
-        <Text className="text-center text-5xl font-black uppercase tracking-tighter text-navy-950">
-          VIP Area
-        </Text>
-        <Text className="mt-2 text-center text-xl font-black uppercase italic tracking-tight text-gold-500">
-          Accurate Games Only
-        </Text>
-      </View>
+      </SafeAreaView>
 
-      {/* Step 1: Payment */}
-      <View className="mb-8 rounded-[48px] border border-slate-200 bg-white p-10 shadow-2xl">
-        <Text className="mb-8 text-3xl font-black uppercase tracking-tighter text-navy-950">
-          1. Subscribe
-        </Text>
-        <View className="shadow-inner items-center rounded-[32px] border border-slate-200 bg-slate-50 p-8">
-          <Text className="mb-2 text-[10px] font-black uppercase tracking-[4px] text-slate-400">
-            Mobile Money
-          </Text>
-          <Text className="text-4xl font-black tracking-tighter text-navy-950">
-            {PAYMENT_NUMBER}
-          </Text>
-          <View className="mt-4 rounded-full border border-gold-500/10 bg-gold-500/10 px-4 py-1">
-            <Text className="text-[10px] font-black uppercase tracking-widest text-gold-600">
-              WAVE OFFICIAL
-            </Text>
+      <ScrollView
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 40 }}
+        keyboardShouldPersistTaps="handled">
+        <View className="px-5 pt-6">
+          {/* Step 1: Payment */}
+          <View className="mb-5 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+            <View className="mb-4 flex-row items-center">
+              <View className="mr-3 h-7 w-7 items-center justify-center rounded-full bg-navy-950">
+                <Text className="text-xs font-black text-white">1</Text>
+              </View>
+              <Text className="text-base font-bold text-navy-950">Make Payment</Text>
+            </View>
+            <View className="items-center rounded-xl bg-slate-50 p-5">
+              <Text className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                Mobile Money
+              </Text>
+              <Text className="mt-1 text-2xl font-black tracking-tight text-navy-950">
+                {PAYMENT_NUMBER}
+              </Text>
+              <Text className="mt-2 text-[10px] font-medium text-gold-600">WAVE OFFICIAL</Text>
+            </View>
+          </View>
+
+          {/* Step 2: Verification */}
+          <View className="mb-5 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+            <View className="mb-4 flex-row items-center">
+              <View className="mr-3 h-7 w-7 items-center justify-center rounded-full bg-navy-950">
+                <Text className="text-xs font-black text-white">2</Text>
+              </View>
+              <Text className="text-base font-bold text-navy-950">Send Proof</Text>
+            </View>
+            <TouchableOpacity
+              onPress={() => Alert.alert('Your Device ID', clientUserId)}
+              className="items-center rounded-xl bg-slate-50 p-5">
+              <Text className="text-2xl font-black tracking-tight text-gold-500">
+                {clientUserId}
+              </Text>
+              <Text className="mt-2 text-[10px] font-medium text-slate-400">
+                Tap to copy your Device ID
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() =>
+                Linking.openURL(
+                  `whatsapp://send?phone=256${WHATSAPP_NUMBER.slice(1)}&text=I have paid for ElitePicks VIP. ID: ${clientUserId}`
+                )
+              }
+              activeOpacity={0.8}
+              className="mt-4 flex-row items-center justify-center rounded-xl bg-green-600 p-4">
+              <FontAwesome name="whatsapp" size={18} color="white" />
+              <Text className="ml-2 text-sm font-bold text-white">Send Proof on WhatsApp</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Step 3: Activate */}
+          <View className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+            <View className="mb-4 flex-row items-center">
+              <View className="mr-3 h-7 w-7 items-center justify-center rounded-full bg-navy-950">
+                <Text className="text-xs font-black text-white">3</Text>
+              </View>
+              <Text className="text-base font-bold text-navy-950">Enter Code</Text>
+            </View>
+
+            {!showManualInput ? (
+              <TouchableOpacity
+                onPress={() => setShowManualInput(true)}
+                className="items-center rounded-xl bg-slate-50 p-5">
+                <Ionicons name="key-outline" size={24} color="#64748b" />
+                <Text className="mt-2 text-xs font-medium text-slate-500">
+                  I have an activation code
+                </Text>
+              </TouchableOpacity>
+            ) : (
+              <View>
+                <TextInput
+                  className="mb-4 rounded-xl border border-slate-200 bg-slate-50 p-4 text-center text-lg font-bold text-navy-950"
+                  placeholder="AW-XXXX"
+                  placeholderTextColor="#94a3b8"
+                  autoCapitalize="characters"
+                  value={manualCode}
+                  onChangeText={setManualCode}
+                />
+                <Button title="UNLOCK VIP" variant="primary" onPress={handleManualUnlock} />
+                <TouchableOpacity
+                  onPress={() => setShowManualInput(false)}
+                  className="mt-3 items-center py-2">
+                  <Text className="text-xs font-medium text-slate-400">Cancel</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         </View>
-      </View>
-
-      {/* Step 2: Verification */}
-      <View className="mb-10 rounded-[48px] border border-slate-200 bg-white p-10 shadow-2xl">
-        <Text className="mb-8 text-3xl font-black uppercase tracking-tighter text-navy-950">
-          2. Activate
-        </Text>
-        <TouchableOpacity
-          onPress={() => {
-            Alert.alert('Copied', clientUserId);
-          }}
-          className="shadow-inner items-center rounded-[32px] border border-slate-200 bg-slate-50 p-8">
-          <Text className="text-5xl font-black tracking-tighter text-gold-500">{clientUserId}</Text>
-          <Text className="mt-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
-            Your Device ID (Tap to Copy)
-          </Text>
-        </TouchableOpacity>
-        <View className="mt-10">
-          <Button
-            title="SEND PROOF ON WHATSAPP"
-            variant="primary"
-            onPress={() =>
-              Linking.openURL(
-                `whatsapp://send?phone=256${WHATSAPP_NUMBER.slice(1)}&text=I have paid for ElitePicks VIP. ID: ${clientUserId}`
-              )
-            }
-          />
-        </View>
-      </View>
-
-      {/* Manual Unlock */}
-      {!showManualInput ? (
-        <TouchableOpacity
-          onPress={() => setShowManualInput(true)}
-          className="mb-20 items-center py-6">
-          <Text className="text-xs font-black uppercase tracking-[3px] text-navy-950/40 underline">
-            I have an activation link/code
-          </Text>
-        </TouchableOpacity>
-      ) : (
-        <View className="mb-20 items-center rounded-[48px] border border-white/5 bg-navy-950 p-10 shadow-2xl">
-          <Ionicons name="key" size={40} color="#fbbf24" style={{ marginBottom: 20 }} />
-          <Text className="mb-8 text-2xl font-black uppercase tracking-tighter text-white">
-            Enter Link Code
-          </Text>
-          <TextInput
-            className="mb-10 w-full rounded-3xl border border-white/10 bg-white/10 p-6 text-center text-3xl font-black tracking-widest text-gold-400"
-            placeholder="AW-XXXX"
-            placeholderTextColor="#334155"
-            autoCapitalize="characters"
-            value={manualCode}
-            onChangeText={setManualCode}
-          />
-          <Button title="UNLOCK VIP NOW" variant="primary" onPress={handleManualUnlock} />
-          <TouchableOpacity onPress={() => setShowManualInput(false)} className="mt-8">
-            <Text className="text-xs font-black uppercase tracking-widest text-white/20">
-              Cancel
-            </Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </KeyboardAwareScreen>
+      </ScrollView>
+    </View>
   );
 }
 
-function VIPMatchCard({ home, away, tip, odds, homeId, awayId, time }: any) {
+function VIPMatchCard({
+  home,
+  away,
+  tip,
+  odds,
+  homeId,
+  awayId,
+  time,
+  league,
+}: {
+  home: string;
+  away: string;
+  tip: string;
+  odds: string;
+  homeId: string;
+  awayId: string;
+  time: string;
+  league?: string;
+}) {
   return (
-    <View className="mb-6 rounded-[48px] border border-slate-200 bg-white p-8 shadow-xl">
-      <View className="mb-8 flex-row items-center justify-between px-2">
-        <Text className="text-[10px] font-black uppercase tracking-[2px] text-slate-400">
-          {time} • ACCURATE GAME
+    <View className="mb-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+      <View className="mb-4 flex-row items-center justify-between">
+        <Text className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+          {league ? `${league} • ` : ''}{time}
         </Text>
-        <View className="rounded-xl border border-green-200 bg-green-100 px-3 py-1 shadow-sm">
-          <Text className="text-[9px] font-black uppercase tracking-widest text-green-700">
-            FIXED
-          </Text>
+        <View className="rounded-md bg-green-50 px-2 py-0.5">
+          <Text className="text-[9px] font-bold uppercase text-green-700">VIP Pick</Text>
         </View>
       </View>
-      <View className="mb-10 flex-row items-center justify-between px-4">
-        <View className="flex-1 items-center">
-          <Image source={getTeamLogo(homeId)} className="mb-4 h-20 w-20" contentFit="contain" />
-          <Text className="text-center text-sm font-black uppercase tracking-tighter text-navy-950">
+
+      <View className="mb-4 flex-row items-center">
+        <View className="flex-1 flex-row items-center">
+          <Image source={getTeamLogo(homeId)} className="mr-2 h-10 w-10" contentFit="contain" />
+          <Text className="flex-1 text-sm font-bold text-navy-950" numberOfLines={1}>
             {home}
           </Text>
         </View>
-        <Text className="px-4 text-4xl font-black italic text-slate-100 opacity-50">VS</Text>
-        <View className="flex-1 items-center">
-          <Image source={getTeamLogo(awayId)} className="mb-4 h-20 w-20" contentFit="contain" />
-          <Text className="text-center text-sm font-black uppercase tracking-tighter text-navy-950">
+        <Text className="mx-3 text-xs font-bold text-slate-300">VS</Text>
+        <View className="flex-1 flex-row-reverse items-center">
+          <Image source={getTeamLogo(awayId)} className="ml-2 h-10 w-10" contentFit="contain" />
+          <Text className="flex-1 text-right text-sm font-bold text-navy-950" numberOfLines={1}>
             {away}
           </Text>
         </View>
       </View>
-      <View className="shadow-inner flex-row items-center justify-between rounded-[36px] border border-slate-200 bg-slate-50 p-6">
+
+      <View className="flex-row items-center justify-between rounded-xl bg-slate-50 p-4">
         <View>
-          <Text className="mb-1 text-[9px] font-black uppercase tracking-widest text-slate-400">
-            ACCURATE PICK
+          <Text className="text-[9px] font-semibold uppercase tracking-wider text-slate-400">
+            Prediction
           </Text>
-          <Text className="text-2xl font-black uppercase tracking-tighter text-gold-500">
-            {tip}
-          </Text>
+          <Text className="text-base font-black uppercase text-gold-500">{tip}</Text>
         </View>
-        <View className="rounded-3xl border border-slate-100 bg-white px-6 py-3 shadow-md">
-          <Text className="text-2xl font-black tracking-tighter text-navy-950">@{odds}</Text>
+        <View className="rounded-lg bg-white px-4 py-2 shadow-sm">
+          <Text className="text-base font-black text-navy-950">@{odds}</Text>
         </View>
       </View>
     </View>

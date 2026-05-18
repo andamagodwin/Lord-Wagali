@@ -9,12 +9,11 @@ import {
   Share,
   ActivityIndicator,
 } from 'react-native';
-import { Container } from '@/components/Container';
 import { Button } from '@/components/Button';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useTips } from '@/context/TipsContext';
-import { KeyboardAwareScreen } from '@/components/KeyboardAwareScreen';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { DOWNLOAD_LINK } from '@/lib/constants';
 
 export default function AdminDashboard() {
@@ -45,7 +44,7 @@ export default function AdminDashboard() {
       await authorizeUserId(cleanId);
 
       const magicLink = `exp://exp.host/@modu/wavetips/--/vip?activate=${cleanId}`;
-      const shareMessage = `✅ ELITEPICKS VIP ACTIVATED!\n\nYour account is now verified. Tap the link below to unlock your premium section:\n\n${magicLink}\n\n🏆 Good Luck!`;
+      const shareMessage = `ElitePicks VIP ACTIVATED!\n\nYour account is now verified. Tap the link to unlock:\n\n${magicLink}`;
 
       Alert.alert('Authorized', `ID ${cleanId} is now active.`, [
         { text: 'Done', style: 'cancel' },
@@ -59,237 +58,242 @@ export default function AdminDashboard() {
   };
 
   const handleResetSystem = () => {
-    Alert.alert(
-      'Reset Database',
-      'Are you sure you want to clear all tips, history, subscriptions, and reset your client ID? This cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Reset Everything',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await resetAllData();
-              setIsAdmin(false);
-              Alert.alert('System Reset', 'All data has been reverted to original defaults.');
-            } catch {
-              return;
-            }
-          },
+    Alert.alert('Reset Database', 'Clear all tips, history, and subscriptions?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Reset Everything',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await resetAllData();
+            setIsAdmin(false);
+          } catch {
+            return;
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   if (isLoading) {
     return (
-      <Container className="items-center justify-center bg-slate-50">
-        <ActivityIndicator size="large" color="#df8d38" />
-        <Text className="mt-4 text-xs font-bold uppercase tracking-widest text-slate-400">
-          Accessing Control Unit...
-        </Text>
-      </Container>
+      <View className="flex-1 items-center justify-center bg-slate-50">
+        <ActivityIndicator size="large" color="#18152e" />
+      </View>
     );
   }
 
   if (!isAdmin) {
     return (
-      <KeyboardAwareScreen className="bg-slate-50" contentClassName="justify-center px-8">
-        <View className="items-center rounded-[48px] border border-slate-200 bg-white p-10 shadow-2xl">
-          <View className="mb-8 h-24 w-24 items-center justify-center rounded-full bg-navy-950 shadow-xl">
-            <Ionicons name="lock-closed" size={48} color="white" />
+      <View className="flex-1 bg-slate-50">
+        <SafeAreaView edges={['top']} className="bg-[#18152e]">
+          <View className="flex-row items-center px-5 pb-4 pt-3">
+            <TouchableOpacity onPress={() => router.back()} className="mr-3">
+              <Ionicons name="arrow-back" size={22} color="white" />
+            </TouchableOpacity>
+            <Text className="text-lg font-black tracking-tight text-white">Admin</Text>
           </View>
-          <Text className="text-center text-3xl font-black uppercase tracking-tighter text-navy-950">
-            Admin Door
-          </Text>
-          <Text className="mb-10 mt-2 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400">
-            ELITEPICKS SYSTEM CONTROL
-          </Text>
+        </SafeAreaView>
 
-          <TextInput
-            className="shadow-inner mb-10 w-full rounded-3xl border border-slate-200 bg-slate-50 p-6 text-center text-3xl font-black tracking-[12px] text-navy-950"
-            placeholder="****"
-            placeholderTextColor="#cbd5e1"
-            secureTextEntry
-            keyboardType="numeric"
-            maxLength={4}
-            value={pass}
-            onChangeText={setPass}
-          />
+        <View className="flex-1 items-center justify-center px-8">
+          <View className="w-full items-center rounded-2xl border border-slate-100 bg-white p-8 shadow-sm">
+            <View className="mb-5 h-16 w-16 items-center justify-center rounded-2xl bg-navy-950">
+              <Ionicons name="lock-closed" size={28} color="white" />
+            </View>
+            <Text className="mb-1 text-lg font-bold text-navy-950">Admin Access</Text>
+            <Text className="mb-6 text-xs text-slate-400">Enter your PIN to continue</Text>
 
-          <Button title="UNLOCK SYSTEM" variant="primary" onPress={handleLogin} />
+            <TextInput
+              className="mb-5 w-full rounded-xl border border-slate-200 bg-slate-50 p-4 text-center text-2xl font-bold tracking-[8px] text-navy-950"
+              placeholder="****"
+              placeholderTextColor="#cbd5e1"
+              secureTextEntry
+              keyboardType="numeric"
+              maxLength={4}
+              value={pass}
+              onChangeText={setPass}
+            />
 
-          <TouchableOpacity onPress={() => router.back()} className="mt-8">
-            <Text className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-              Return to App
-            </Text>
-          </TouchableOpacity>
+            <Button title="UNLOCK" variant="primary" onPress={handleLogin} />
+          </View>
         </View>
-      </KeyboardAwareScreen>
+      </View>
     );
   }
 
   if (view === 'vip-manage') {
     return (
-      <KeyboardAwareScreen className="bg-slate-50" contentClassName="px-6 pt-6">
-        <TouchableOpacity onPress={() => setView('main')} className="mb-6 flex-row items-center">
-          <Ionicons name="arrow-back" size={20} color="#001f3f" />
-          <Text className="ml-2 text-xs font-black uppercase text-navy-950">Main Menu</Text>
-        </TouchableOpacity>
+      <View className="flex-1 bg-slate-50">
+        <SafeAreaView edges={['top']} className="bg-[#18152e]">
+          <View className="flex-row items-center px-5 pb-4 pt-3">
+            <TouchableOpacity onPress={() => setView('main')} className="mr-3">
+              <Ionicons name="arrow-back" size={22} color="white" />
+            </TouchableOpacity>
+            <Text className="text-lg font-black tracking-tight text-white">Manage Access</Text>
+          </View>
+        </SafeAreaView>
 
-        <Text className="mb-2 text-3xl font-black uppercase tracking-tighter text-navy-950">
-          Manage Access
-        </Text>
-        <Text className="mb-8 font-medium text-slate-500">
-          Add payment verified User IDs to the master list.
-        </Text>
-
-        <View className="mb-10 rounded-[44px] border border-slate-200 bg-white p-8 shadow-lg">
-          <TextInput
-            className="shadow-inner mb-8 rounded-3xl border border-slate-200 bg-slate-50 p-6 text-center text-2xl font-black text-navy-950"
-            placeholder="AW-XXXX"
-            autoCapitalize="characters"
-            value={userIdInput}
-            onChangeText={setUserIdInput}
-          />
-          <Button title="GRANT VIP & SHARE" variant="primary" onPress={grantVipAccess} />
-        </View>
-
-        <Text className="mb-4 px-4 text-lg font-black uppercase tracking-tighter text-navy-950">
-          Live Subscribers
-        </Text>
-        <ScrollView className="max-h-60 px-2">
-          {authorizedIds.length === 0 ? (
-            <View className="items-center justify-center rounded-[32px] border border-slate-100 bg-white p-6">
-              <Text className="text-center text-xs font-bold uppercase tracking-widest text-slate-400">
-                No Active Subscribers
-              </Text>
+        <ScrollView
+          className="flex-1"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 40 }}
+          keyboardShouldPersistTaps="handled">
+          <View className="px-5 pt-5">
+            {/* Grant Access */}
+            <View className="mb-5 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+              <Text className="mb-3 text-sm font-bold text-navy-950">Grant VIP Access</Text>
+              <TextInput
+                className="mb-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-center text-base font-bold text-navy-950"
+                placeholder="AW-XXXX"
+                placeholderTextColor="#94a3b8"
+                autoCapitalize="characters"
+                value={userIdInput}
+                onChangeText={setUserIdInput}
+              />
+              <Button title="GRANT & SHARE" variant="primary" onPress={grantVipAccess} />
             </View>
-          ) : (
-            authorizedIds.map((id) => (
-              <View
-                key={id}
-                className="mb-3 flex-row items-center justify-between rounded-[32px] border border-slate-100 bg-white p-5 shadow-sm">
-                <View className="mr-2 flex-1">
-                  <Text className="font-mono text-base font-black text-navy-950">{id}</Text>
-                  <Text className="text-[9px] font-bold uppercase tracking-widest text-green-600">
-                    Active
-                  </Text>
-                </View>
-                <View className="flex-row items-center">
-                  <TouchableOpacity
-                    onPress={() => deauthorizeUserId(id)}
-                    className="mr-2 rounded-2xl border border-red-100 bg-red-50 p-3">
-                    <Ionicons name="trash-outline" size={18} color="#ef4444" />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() =>
-                      Share.share({
-                        message: `Your ElitePicks VIP Access:\n\nexp://exp.host/@modu/wavetips/--/vip?activate=${id}`,
-                      })
-                    }
-                    className="rounded-2xl bg-navy-950 p-3">
-                    <Ionicons name="share-social" size={18} color="#fbbf24" />
-                  </TouchableOpacity>
-                </View>
+
+            {/* Subscriber List */}
+            <Text className="mb-3 text-xs font-bold text-navy-950">
+              Active Subscribers ({authorizedIds.length})
+            </Text>
+            {authorizedIds.length === 0 ? (
+              <View className="items-center rounded-2xl border border-slate-100 bg-white p-6">
+                <Text className="text-xs text-slate-400">No active subscribers</Text>
               </View>
-            ))
-          )}
+            ) : (
+              authorizedIds.map((id) => (
+                <View
+                  key={id}
+                  className="mb-2 flex-row items-center justify-between rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+                  <View>
+                    <Text className="text-sm font-bold text-navy-950">{id}</Text>
+                    <Text className="text-[9px] font-medium text-green-600">Active</Text>
+                  </View>
+                  <View className="flex-row items-center gap-x-2">
+                    <TouchableOpacity
+                      onPress={() => deauthorizeUserId(id)}
+                      className="rounded-lg bg-red-50 p-2">
+                      <Ionicons name="trash-outline" size={16} color="#ef4444" />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() =>
+                        Share.share({
+                          message: `Your ElitePicks VIP Access:\n\nexp://exp.host/@modu/wavetips/--/vip?activate=${id}`,
+                        })
+                      }
+                      className="rounded-lg bg-navy-950 p-2">
+                      <Ionicons name="share-social" size={16} color="#fbbf24" />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ))
+            )}
+          </View>
         </ScrollView>
-      </KeyboardAwareScreen>
+      </View>
     );
   }
 
+  // Main admin view
   return (
-    <KeyboardAwareScreen className="bg-slate-50" contentClassName="px-4 pt-6">
-      <View className="mb-10 flex-row items-center justify-between px-2">
-        <View>
-          <Text className="text-4xl font-black tracking-tighter text-navy-950">Control</Text>
-          <Text className="text-[10px] font-bold uppercase italic tracking-widest text-gold-500">
-            Encrypted Session
-          </Text>
+    <View className="flex-1 bg-slate-50">
+      <SafeAreaView edges={['top']} className="bg-[#18152e]">
+        <View className="flex-row items-center justify-between px-5 pb-4 pt-3">
+          <View>
+            <Text className="text-lg font-black tracking-tight text-white">Control Panel</Text>
+            <Text className="text-[9px] font-medium uppercase tracking-widest text-gold-400">
+              Admin Session
+            </Text>
+          </View>
+          <TouchableOpacity onPress={() => setIsAdmin(false)} className="rounded-lg bg-red-500/20 p-2">
+            <Ionicons name="power" size={20} color="#ef4444" />
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity onPress={() => setIsAdmin(false)} className="rounded-3xl bg-red-50 p-4">
-          <Ionicons name="power" size={24} color="#ef4444" />
-        </TouchableOpacity>
-      </View>
+      </SafeAreaView>
 
-      <View className="-mx-2 flex-row flex-wrap">
-        <AdminCard
-          title="Edit Free Tips"
-          icon="list"
-          color="bg-navy-950"
-          onPress={() => router.push('/manage-free')}
-        />
-        <AdminCard
-          title="Edit VIP Tips"
-          icon="star"
-          color="bg-gold-500"
-          onPress={() => router.push('/manage-vip-tips')}
-        />
-        <AdminCard
-          title="Grant Access"
-          icon="person-add"
-          color="bg-white"
-          border="border-slate-200"
-          shadow="shadow-md"
-          onPress={() => setView('vip-manage')}
-        />
-        <AdminCard
-          title="Past Results"
-          icon="time"
-          color="bg-white"
-          border="border-slate-200"
-          shadow="shadow-md"
-          onPress={() => router.push('/history')}
-        />
-      </View>
+      <ScrollView
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 40 }}>
+        <View className="px-5 pt-5">
+          <View className="flex-row flex-wrap gap-3">
+            <AdminCard
+              title="Free Tips"
+              icon="list"
+              bg="bg-navy-950"
+              onPress={() => router.push('/manage-free')}
+            />
+            <AdminCard
+              title="VIP Tips"
+              icon="star"
+              bg="bg-gold-500"
+              onPress={() => router.push('/manage-vip-tips')}
+            />
+            <AdminCard
+              title="Access"
+              icon="person-add"
+              bg="bg-white"
+              onPress={() => setView('vip-manage')}
+            />
+            <AdminCard
+              title="Results"
+              icon="time"
+              bg="bg-white"
+              onPress={() => router.push('/(tabs)/history')}
+            />
+          </View>
 
-      <View className="mt-10 items-center rounded-[48px] bg-navy-950 p-10 shadow-2xl">
-        <View className="mb-4 rounded-[28px] bg-white/10 p-5">
-          <Ionicons name="globe-outline" size={32} color="#fbbf24" />
+          {/* Download Link */}
+          <View className="mt-6 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+            <Text className="mb-3 text-sm font-bold text-navy-950">Share Download Link</Text>
+            <Button
+              title="COPY & SHARE"
+              variant="primary"
+              onPress={() =>
+                Share.share({
+                  message: `Download ElitePicks: ${DOWNLOAD_LINK}`,
+                })
+              }
+            />
+          </View>
+
+          {/* Reset */}
+          <TouchableOpacity onPress={handleResetSystem} className="mt-8 items-center py-4">
+            <Text className="text-xs font-bold text-red-500">Reset System Database</Text>
+          </TouchableOpacity>
         </View>
-        <Text className="mb-2 text-2xl font-black uppercase tracking-tighter text-gold-400">
-          Download Link
-        </Text>
-        <Text className="mb-10 px-4 text-[10px] font-bold uppercase tracking-widest text-white/40">
-          MediaFire Download Folder
-        </Text>
-        <Button
-          title="COPY SITE URL"
-          variant="primary"
-          onPress={() =>
-            Share.share({
-              message: `Download ElitePicks (Professional Accurate Games): ${DOWNLOAD_LINK}`,
-            })
-          }
-        />
-      </View>
-
-      <TouchableOpacity onPress={handleResetSystem} className="mb-20 mt-6 items-center py-4">
-        <Text className="text-xs font-black uppercase tracking-[3px] text-red-500 underline">
-          Reset System Database
-        </Text>
-      </TouchableOpacity>
-    </KeyboardAwareScreen>
+      </ScrollView>
+    </View>
   );
 }
 
-function AdminCard({ title, icon, color, border, shadow, onPress }: any) {
-  const isWhite = color === 'bg-white';
+function AdminCard({
+  title,
+  icon,
+  bg,
+  onPress,
+}: {
+  title: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  bg: string;
+  onPress: () => void;
+}) {
+  const isDark = bg === 'bg-navy-950' || bg === 'bg-gold-500';
   return (
-    <TouchableOpacity onPress={onPress} className="w-1/2 p-2">
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.7}
+      className="w-[47%]">
       <View
-        className={`${color} ${border} ${shadow} h-48 items-center justify-center rounded-[44px] border p-6 shadow-lg`}>
-        <View className={`mb-4 rounded-[24px] p-4 ${isWhite ? 'bg-navy-50' : 'bg-white/10'}`}>
-          <Ionicons
-            name={icon}
-            size={28}
-            color={isWhite ? '#001f3f' : color === 'bg-gold-500' ? 'black' : 'white'}
-          />
-        </View>
+        className={`${bg} h-32 items-center justify-center rounded-2xl ${isDark ? '' : 'border border-slate-100'} shadow-sm`}>
+        <Ionicons
+          name={icon}
+          size={24}
+          color={bg === 'bg-navy-950' ? 'white' : bg === 'bg-gold-500' ? '#18152e' : '#18152e'}
+        />
         <Text
-          className={`${isWhite ? 'text-navy-950' : color === 'bg-gold-500' ? 'text-black' : 'text-white'} text-center text-[10px] font-black uppercase tracking-widest`}>
+          className={`mt-2 text-[10px] font-bold uppercase tracking-wider ${isDark ? (bg === 'bg-gold-500' ? 'text-navy-950' : 'text-white') : 'text-navy-950'}`}>
           {title}
         </Text>
       </View>

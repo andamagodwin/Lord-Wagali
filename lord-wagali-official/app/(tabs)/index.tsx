@@ -9,18 +9,18 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from 'react-native';
-import { Container } from '@/components/Container';
 import { Ionicons, FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import { useTips } from '@/context/TipsContext';
 import { StatusBar } from 'expo-status-bar';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { DOWNLOAD_LINK, WHATSAPP_NUMBER } from '@/lib/constants';
 
 export const getTeamLogo = (logo: string) => {
   if (!logo) return 'https://media.api-sports.io/football/teams/0.png';
   if (logo.startsWith('http')) return logo;
-  if (isNaN(Number(logo))) return `https://media.api-sports.io/football/teams/0.png`;
+  if (isNaN(Number(logo))) return 'https://media.api-sports.io/football/teams/0.png';
   return `https://media.api-sports.io/football/teams/${logo}.png`;
 };
 
@@ -41,47 +41,45 @@ export default function Home() {
     });
 
   return (
-    <Container className="bg-slate-50">
+    <View className="flex-1 bg-slate-50">
       <StatusBar style="light" backgroundColor="#18152e" />
-      {/* Premium Header */}
-      <View className="rounded-b-[48px] border-b border-navy-900 bg-navy-950 px-6 pb-10 pt-12 shadow-2xl">
-        <View className="flex-row items-center justify-between">
-          <View className="flex-row items-center">
-            <TouchableOpacity
-              activeOpacity={1}
-              onLongPress={() => router.push('/admin')}
-              className="w-18 h-18 overflow-hidden rounded-[24px] border-2 border-gold-400 bg-zinc-800 shadow-2xl">
-              <Image
-                source={require('@/assets/img_1778617166715_015o.jpg')}
-                className="h-full w-full"
-                contentFit="cover"
-              />
-            </TouchableOpacity>
-            <View className="ml-4">
-              <Text className="text-3xl font-black uppercase tracking-tighter text-white">
-                ElitePicks
-              </Text>
-              <View className="mt-1 self-start rounded-lg bg-gold-500 px-2 py-0.5">
-                <Text className="text-[9px] font-black uppercase italic tracking-widest text-navy-950">
-                  Official App
+
+      {/* Header */}
+      <SafeAreaView edges={['top']} className="bg-[#18152e]">
+        <View className="px-5 pb-5 pt-3">
+          <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center">
+              <TouchableOpacity
+                activeOpacity={1}
+                onLongPress={() => router.push('/admin')}
+                className="h-11 w-11 overflow-hidden rounded-xl border border-white/20">
+                <Image
+                  source={require('@/assets/img_1778617166715_015o.jpg')}
+                  className="h-full w-full"
+                  contentFit="cover"
+                />
+              </TouchableOpacity>
+              <View className="ml-3">
+                <Text className="text-lg font-black tracking-tight text-white">ElitePicks</Text>
+                <Text className="text-[9px] font-semibold uppercase tracking-widest text-gold-400">
+                  Accurate Predictions
                 </Text>
               </View>
             </View>
-          </View>
 
-          <View className="flex-row">
             <TouchableOpacity
               onPress={shareApp}
-              className="mr-2 h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/10">
-              <Ionicons name="share-social-outline" size={20} color="white" />
+              className="h-10 w-10 items-center justify-center rounded-xl bg-white/10">
+              <Ionicons name="share-social-outline" size={18} color="white" />
             </TouchableOpacity>
           </View>
         </View>
-      </View>
+      </SafeAreaView>
 
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 24 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -93,133 +91,128 @@ export default function Home() {
         {/* VIP Access Banner */}
         <TouchableOpacity
           onPress={() => router.push('/(tabs)/vip')}
-          className="mx-6 mt-6 flex-row items-center justify-between rounded-[40px] border-4 border-white/20 bg-gold-500 p-8 shadow-2xl">
+          activeOpacity={0.85}
+          className="mx-5 mt-5 flex-row items-center justify-between rounded-2xl bg-gold-500 p-5">
           <View className="flex-1">
-            <Text className="text-2xl font-black uppercase tracking-tighter text-navy-950">
-              VIP ACCURATE
+            <Text className="text-base font-black uppercase tracking-tight text-navy-950">
+              VIP Predictions
             </Text>
-            <Text className="mt-1 text-[10px] font-bold uppercase tracking-widest text-navy-900 opacity-80">
-              Unlock Elite Winning Games
+            <Text className="mt-0.5 text-[10px] font-medium text-navy-900/70">
+              Unlock premium winning picks
             </Text>
           </View>
-          <View className="rounded-3xl bg-navy-950 p-4 shadow-lg">
-            <Ionicons name="lock-open" size={28} color="#fbbf24" />
+          <View className="rounded-xl bg-navy-950 p-3">
+            <Ionicons name="lock-open" size={20} color="#fbbf24" />
           </View>
         </TouchableOpacity>
 
-        <View className="mt-10 px-6">
-          <View className="mb-6 flex-row items-center justify-between px-1">
-            <Text className="text-3xl font-black uppercase tracking-tighter text-navy-950">
-              Free Tips
-            </Text>
+        {/* Free Tips Section */}
+        <View className="mt-8 px-5">
+          <View className="mb-5 flex-row items-center justify-between">
+            <Text className="text-lg font-black text-navy-950">Today's Free Tips</Text>
             <TouchableOpacity onPress={() => router.push('/(tabs)/history')}>
-              <Text className="text-xs font-black tracking-widest text-coral-500">RESULTS</Text>
+              <Text className="text-xs font-bold text-coral-500">See Results</Text>
             </TouchableOpacity>
           </View>
 
           {isLoading && !refreshing ? (
-            <View className="items-center justify-center py-20">
-              <ActivityIndicator size="large" color="#df8d38" />
-              <Text className="mt-4 text-xs font-bold uppercase tracking-widest text-slate-400">
-                Updating Predictions...
+            <View className="items-center justify-center py-16">
+              <ActivityIndicator size="large" color="#18152e" />
+              <Text className="mt-3 text-xs font-medium text-slate-400">
+                Loading predictions...
               </Text>
             </View>
           ) : tips.length === 0 ? (
-            <View className="mb-6 items-center justify-center rounded-[44px] border border-slate-200 bg-white p-10 py-16 shadow-xl">
-              <Ionicons name="football-outline" size={48} color="#cbd5e1" />
-              <Text className="mt-4 text-lg font-black uppercase tracking-tighter text-navy-950">
-                No Active Tips
-              </Text>
-              <Text className="mt-1 text-center text-xs font-medium text-slate-400">
-                We are analyzing today&apos;s fixtures. Check back shortly!
+            <View className="items-center justify-center rounded-2xl border border-slate-100 bg-white p-10 shadow-sm">
+              <Ionicons name="football-outline" size={40} color="#cbd5e1" />
+              <Text className="mt-4 text-base font-bold text-navy-950">No Active Tips</Text>
+              <Text className="mt-1 text-center text-xs text-slate-400">
+                We're analyzing today's fixtures. Check back shortly.
               </Text>
             </View>
           ) : (
             tips.map((item) => (
               <TouchableOpacity
                 key={item.id}
+                activeOpacity={0.7}
                 onPress={() => router.push({ pathname: '/analysis/[id]', params: { id: item.id } })}
-                className="mb-6 rounded-[44px] border border-slate-200 bg-white p-6 shadow-xl">
-                <View className="mb-6 flex-row items-center justify-between px-2">
-                  <Text className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                    {item.league || 'Today'} • {item.time || 'Football'}
+                className="mb-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+                <View className="mb-4 flex-row items-center justify-between">
+                  <Text className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                    {item.league || 'Football'} • {item.time || 'Today'}
                   </Text>
-                  <View className="rounded-full border border-green-200 bg-green-100 px-3 py-1">
-                    <Text className="text-[9px] font-black uppercase text-green-700">
-                      {item.prob || '85%'} ACCURATE
+                  <View className="rounded-md bg-green-50 px-2 py-0.5">
+                    <Text className="text-[9px] font-bold text-green-700">
+                      {item.prob || '85%'}
                     </Text>
                   </View>
                 </View>
 
-                <View className="mb-6 flex-row items-center justify-between px-2">
-                  <View className="flex-1 items-center">
+                <View className="mb-4 flex-row items-center">
+                  <View className="flex-1 flex-row items-center">
                     <Image
                       source={getTeamLogo(item.homeLogo)}
-                      className="mb-2 h-16 w-16"
+                      className="mr-2 h-10 w-10"
                       contentFit="contain"
                     />
-                    <Text
-                      className="text-center text-[11px] font-black uppercase text-navy-950"
-                      numberOfLines={1}>
+                    <Text className="flex-1 text-sm font-bold text-navy-950" numberOfLines={1}>
                       {item.home}
                     </Text>
                   </View>
 
-                  <View className="flex-1 items-center px-4">
-                    <View className="w-full items-center rounded-3xl border border-white/20 bg-coral-500 py-3 shadow-xl shadow-coral-500/40">
-                      <Text className="text-xs font-black uppercase tracking-tighter text-white">
-                        {item.tip}
-                      </Text>
-                    </View>
-                    <Text className="mt-2 text-[10px] font-black tracking-widest text-slate-400">
-                      ODDS {item.odds}
+                  <View className="mx-3 rounded-lg bg-coral-500 px-3 py-1.5">
+                    <Text className="text-[10px] font-black uppercase text-white">
+                      {item.tip}
                     </Text>
                   </View>
 
-                  <View className="flex-1 items-center">
+                  <View className="flex-1 flex-row-reverse items-center">
                     <Image
                       source={getTeamLogo(item.awayLogo)}
-                      className="mb-2 h-16 w-16"
+                      className="ml-2 h-10 w-10"
                       contentFit="contain"
                     />
                     <Text
-                      className="text-center text-[11px] font-black uppercase text-navy-950"
+                      className="flex-1 text-right text-sm font-bold text-navy-950"
                       numberOfLines={1}>
                       {item.away}
                     </Text>
                   </View>
                 </View>
 
-                <View className="flex-row items-center justify-center border-t border-slate-50 pt-6">
-                  <Ionicons name="analytics" size={16} color="#fbbf24" />
-                  <Text className="ml-2 text-[10px] font-black uppercase tracking-widest text-slate-500">
-                    Full Match Analysis
+                <View className="flex-row items-center justify-between border-t border-slate-50 pt-3">
+                  <Text className="text-[10px] font-semibold text-slate-400">
+                    Odds: {item.odds}
                   </Text>
+                  <View className="flex-row items-center">
+                    <Text className="mr-1 text-[10px] font-semibold text-slate-400">Analysis</Text>
+                    <Ionicons name="chevron-forward" size={12} color="#94a3b8" />
+                  </View>
                 </View>
               </TouchableOpacity>
             ))
           )}
         </View>
 
-        <View className="mb-20 mt-12 px-6 pb-6">
+        {/* WhatsApp CTA */}
+        <View className="mt-8 px-5">
           <TouchableOpacity
             onPress={() => Linking.openURL(`whatsapp://send?phone=256${WHATSAPP_NUMBER.slice(1)}`)}
-            className="flex-row items-center justify-center rounded-[44px] bg-green-600 p-6 shadow-2xl shadow-green-600/30">
-            <FontAwesome name="whatsapp" size={24} color="white" />
-            <Text className="ml-4 text-xl font-black tracking-tighter text-white">
-              Contact ElitePicks
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onLongPress={() => router.push('/admin')}
-            className="mt-10 items-center py-6 opacity-20">
-            <Text className="text-[10px] font-black uppercase tracking-widest text-navy-950">
-              ElitePicks Accurate Games • {new Date().getFullYear()}
-            </Text>
+            activeOpacity={0.8}
+            className="flex-row items-center justify-center rounded-2xl bg-green-600 p-4">
+            <FontAwesome name="whatsapp" size={20} color="white" />
+            <Text className="ml-3 text-sm font-bold text-white">Contact Support</Text>
           </TouchableOpacity>
         </View>
+
+        <TouchableOpacity
+          onLongPress={() => router.push('/admin')}
+          className="mt-8 items-center pb-4 opacity-20">
+          <Text className="text-[9px] font-medium uppercase tracking-widest text-navy-950">
+            ElitePicks • {new Date().getFullYear()}
+          </Text>
+        </TouchableOpacity>
       </ScrollView>
-    </Container>
+    </View>
   );
 }

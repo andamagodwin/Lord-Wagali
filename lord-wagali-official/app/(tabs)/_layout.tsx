@@ -12,16 +12,15 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: '#18152e',
           borderTopWidth: 0,
-          height: Platform.OS === 'ios' ? 88 : 64,
-          paddingBottom: Platform.OS === 'ios' ? 28 : 8,
-          paddingTop: 8,
+          height: Platform.OS === 'ios' ? 90 : 68,
+          paddingBottom: Platform.OS === 'ios' ? 30 : 12,
+          paddingTop: 10,
           elevation: 0,
         },
         tabBarLabelStyle: {
-          fontSize: 10,
-          fontWeight: '800',
-          letterSpacing: 1,
-          textTransform: 'uppercase',
+          fontSize: 9,
+          fontWeight: '700',
+          letterSpacing: 0.5,
         },
       }}>
       <Tabs.Screen
@@ -54,9 +53,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Settings',
+          title: 'More',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="options" size={size} color={color} />
+            <Ionicons name="ellipsis-horizontal" size={size} color={color} />
           ),
         }}
       />
