@@ -16,10 +16,7 @@ export default function RootLayout() {
             headerTitleStyle: { fontWeight: 'bold' },
             headerShadowVisible: false,
           }}>
-          <Stack.Screen name="index" options={{ title: 'ElitePicks', headerShown: false }} />
-          <Stack.Screen name="settings" options={{ title: 'Settings' }} />
-          <Stack.Screen name="history" options={{ title: 'History' }} />
-          <Stack.Screen name="vip" options={{ title: 'ElitePicks VIP' }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="admin" options={{ title: 'Admin Portal' }} />
           <Stack.Screen name="manage-free" options={{ title: 'Manage Free Tips' }} />
           <Stack.Screen name="manage-vip-tips" options={{ title: 'Manage VIP Tips' }} />

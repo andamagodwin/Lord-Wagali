@@ -1,14 +1,16 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Share, Linking, Switch } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Share, Linking } from 'react-native';
 import { Container } from '@/components/Container';
 import { Ionicons, FontAwesome } from '@expo/vector-icons';
-
-const DOWNLOAD_LINK = 'https://www.mediafire.com/folder/lvoiimmjhifd9/AlphaWins';
+import { useTips } from '@/context/TipsContext';
+import { DOWNLOAD_LINK, WHATSAPP_NUMBER } from '@/lib/constants';
 
 export default function Settings() {
+  const { clientUserId } = useTips();
+
   const shareApp = () =>
     Share.share({
-      message: `Join ElitePicks for daily accurate games! 🏆⚽ Download the app here: ${DOWNLOAD_LINK}`,
+      message: `Join ElitePicks for daily accurate games! Download the app here: ${DOWNLOAD_LINK}`,
     });
 
   return (
@@ -18,27 +20,18 @@ export default function Settings() {
           Settings
         </Text>
 
+        {/* User Info */}
         <View className="mb-6 rounded-[44px] border border-slate-200 bg-white p-8 shadow-xl">
-          <View className="flex-row items-center justify-between">
-            <View className="flex-row items-center">
-              <View className="mr-4 h-12 w-12 items-center justify-center rounded-3xl border border-slate-100 bg-slate-50">
-                <Ionicons name="notifications" size={24} color="#64748b" />
-              </View>
-              <View>
-                <Text className="text-lg font-black uppercase tracking-tighter text-navy-950">
-                  Push Alerts
-                </Text>
-                <Text className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                  Notifications active
-                </Text>
-              </View>
+          <View className="flex-row items-center">
+            <View className="mr-4 h-12 w-12 items-center justify-center rounded-3xl border border-slate-100 bg-navy-950">
+              <Ionicons name="person" size={24} color="#fbbf24" />
             </View>
-            <Switch
-              value={true}
-              onValueChange={() => {}}
-              trackColor={{ false: '#cbd5e1', true: '#16a34a' }}
-              thumbColor="white"
-            />
+            <View className="flex-1">
+              <Text className="text-lg font-black uppercase tracking-tighter text-navy-950">
+                Device ID
+              </Text>
+              <Text className="text-sm font-bold text-gold-500">{clientUserId}</Text>
+            </View>
           </View>
         </View>
 
@@ -49,7 +42,9 @@ export default function Settings() {
         </View>
 
         <TouchableOpacity
-          onPress={() => Linking.openURL('whatsapp://send?phone=256703354991')}
+          onPress={() =>
+            Linking.openURL(`whatsapp://send?phone=256${WHATSAPP_NUMBER.slice(1)}`)
+          }
           className="mb-6 flex-row items-center rounded-[44px] border border-slate-200 bg-white p-8 shadow-xl">
           <View className="mr-4 h-12 w-12 items-center justify-center rounded-3xl border border-green-500/10 bg-green-500/10">
             <FontAwesome name="whatsapp" size={24} color="#22c55e" />
@@ -84,7 +79,7 @@ export default function Settings() {
 
         <View className="mt-20 items-center opacity-10">
           <Text className="text-[10px] font-black uppercase tracking-[5px] text-navy-950">
-            VERSION 4.2.0
+            VERSION 5.0.0
           </Text>
         </View>
 

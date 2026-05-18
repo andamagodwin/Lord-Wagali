@@ -29,7 +29,7 @@ export function ToastHost() {
     return null;
   }
 
-  const gradientColors =
+  const gradientColors: [string, string] =
     toast.variant === 'success'
       ? ['#0f766e', '#134e4a']
       : toast.variant === 'error'

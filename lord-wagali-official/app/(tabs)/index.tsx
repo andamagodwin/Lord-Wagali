@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -7,32 +7,37 @@ import {
   Share,
   Linking,
   ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { Container } from '@/components/Container';
 import { Ionicons, FontAwesome } from '@expo/vector-icons';
-import { Link, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import { useTips } from '@/context/TipsContext';
 import { StatusBar } from 'expo-status-bar';
-
-const DOWNLOAD_LINK = 'https://www.mediafire.com/folder/lvoiimmjhifd9/AlphaWins';
+import { DOWNLOAD_LINK, WHATSAPP_NUMBER } from '@/lib/constants';
 
 export const getTeamLogo = (logo: string) => {
   if (!logo) return 'https://media.api-sports.io/football/teams/0.png';
   if (logo.startsWith('http')) return logo;
-  // If it's just team name or non-numeric, try to fallback safely
   if (isNaN(Number(logo))) return `https://media.api-sports.io/football/teams/0.png`;
   return `https://media.api-sports.io/football/teams/${logo}.png`;
 };
 
 export default function Home() {
   const router = useRouter();
-  const { tips, isLoading } = useTips();
-  const WHATSAPP_NUMBER = '0703354991';
+  const { tips, isLoading, hydrate } = useTips();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await hydrate();
+    setRefreshing(false);
+  }, [hydrate]);
 
   const shareApp = () =>
     Share.share({
-      message: `Join ElitePicks for daily accurate games! 🏆⚽ Download the app here: ${DOWNLOAD_LINK}`,
+      message: `Join ElitePicks for daily accurate games! Download the app here: ${DOWNLOAD_LINK}`,
     });
 
   return (
@@ -70,25 +75,30 @@ export default function Home() {
               className="mr-2 h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/10">
               <Ionicons name="share-social-outline" size={20} color="white" />
             </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => router.push('/settings')}
-              className="h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/10">
-              <Ionicons name="options-outline" size={20} color="white" />
-            </TouchableOpacity>
           </View>
         </View>
       </View>
 
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#fbbf24"
+            colors={['#fbbf24']}
+          />
+        }>
         {/* VIP Access Banner */}
         <TouchableOpacity
-          onPress={() => router.push('/vip')}
+          onPress={() => router.push('/(tabs)/vip')}
           className="mx-6 mt-6 flex-row items-center justify-between rounded-[40px] border-4 border-white/20 bg-gold-500 p-8 shadow-2xl">
           <View className="flex-1">
             <Text className="text-2xl font-black uppercase tracking-tighter text-navy-950">
               VIP ACCURATE
             </Text>
-            <Text className="mt-1 text-[11px] font-bold uppercase tracking-widest text-navy-900 opacity-80">
+            <Text className="mt-1 text-[10px] font-bold uppercase tracking-widest text-navy-900 opacity-80">
               Unlock Elite Winning Games
             </Text>
           </View>
@@ -102,14 +112,12 @@ export default function Home() {
             <Text className="text-3xl font-black uppercase tracking-tighter text-navy-950">
               Free Tips
             </Text>
-            <Link href="/history" asChild>
-              <TouchableOpacity>
-                <Text className="text-xs font-black tracking-widest text-coral-500">RESULTS →</Text>
-              </TouchableOpacity>
-            </Link>
+            <TouchableOpacity onPress={() => router.push('/(tabs)/history')}>
+              <Text className="text-xs font-black tracking-widest text-coral-500">RESULTS</Text>
+            </TouchableOpacity>
           </View>
 
-          {isLoading ? (
+          {isLoading && !refreshing ? (
             <View className="items-center justify-center py-20">
               <ActivityIndicator size="large" color="#df8d38" />
               <Text className="mt-4 text-xs font-bold uppercase tracking-widest text-slate-400">
@@ -193,7 +201,7 @@ export default function Home() {
           )}
         </View>
 
-        <View className="mb-20 mt-12 px-6 pb-20">
+        <View className="mb-20 mt-12 px-6 pb-6">
           <TouchableOpacity
             onPress={() => Linking.openURL(`whatsapp://send?phone=256${WHATSAPP_NUMBER.slice(1)}`)}
             className="flex-row items-center justify-center rounded-[44px] bg-green-600 p-6 shadow-2xl shadow-green-600/30">
@@ -207,7 +215,7 @@ export default function Home() {
             onLongPress={() => router.push('/admin')}
             className="mt-10 items-center py-6 opacity-20">
             <Text className="text-[10px] font-black uppercase tracking-widest text-navy-950">
-              © ElitePicks Accurate Games • {new Date().getFullYear()}
+              ElitePicks Accurate Games • {new Date().getFullYear()}
             </Text>
           </TouchableOpacity>
         </View>

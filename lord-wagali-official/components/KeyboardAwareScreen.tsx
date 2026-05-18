@@ -7,6 +7,7 @@ import {
   View,
   StyleSheet,
   type ScrollViewProps,
+  type RefreshControlProps,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -19,6 +20,7 @@ interface KeyboardAwareScreenProps {
   extraBottomPadding?: number;
   extraTopOffset?: number;
   scrollProps?: Partial<ScrollViewProps>;
+  refreshControl?: React.ReactElement<RefreshControlProps>;
 }
 
 export function KeyboardAwareScreen({
@@ -28,6 +30,7 @@ export function KeyboardAwareScreen({
   extraBottomPadding = 40,
   extraTopOffset = 0,
   scrollProps,
+  refreshControl,
 }: KeyboardAwareScreenProps) {
   const { contentBottomPadding, keyboardVerticalOffset, dismissKeyboard } = useKeyboardAwareLayout(
     extraBottomPadding,
@@ -52,6 +55,7 @@ export function KeyboardAwareScreen({
             keyboardDismissMode="on-drag"
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: contentBottomPadding, flexGrow: 1 }}
+            refreshControl={refreshControl}
             {...scrollProps}>
             <View className={`flex-1 ${contentClassName}`}>{children}</View>
           </ScrollView>

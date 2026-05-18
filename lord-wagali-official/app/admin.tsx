@@ -15,8 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useTips } from '@/context/TipsContext';
 import { KeyboardAwareScreen } from '@/components/KeyboardAwareScreen';
-
-const DOWNLOAD_LINK = 'https://www.mediafire.com/folder/lvoiimmjhifd9/AlphaWins';
+import { DOWNLOAD_LINK } from '@/lib/constants';
 
 export default function AdminDashboard() {
   const router = useRouter();

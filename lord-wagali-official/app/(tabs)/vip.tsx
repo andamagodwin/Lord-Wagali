@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   Linking,
   TextInput,
   ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { Container } from '@/components/Container';
 import { Button } from '@/components/Button';
@@ -16,23 +17,29 @@ import { useLocalSearchParams } from 'expo-router';
 import { useTips } from '@/context/TipsContext';
 import { getTeamLogo } from './index';
 import { KeyboardAwareScreen } from '@/components/KeyboardAwareScreen';
+import { WHATSAPP_NUMBER, PAYMENT_NUMBER } from '@/lib/constants';
 
 export default function VIP() {
   const params = useLocalSearchParams();
-  const WHATSAPP_NUMBER = '0703354991';
-  const PAYMENT_NUMBER = '0793726930';
 
-  const { vipTips, clientUserId, clientIsVip, activateVipOnClient, isLoading } = useTips();
+  const { vipTips, clientUserId, clientIsVip, activateVipOnClient, isLoading, hydrate } =
+    useTips();
   const [manualCode, setManualCode] = useState('');
   const [showManualInput, setShowManualInput] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-  // Robust Activation Logic from Deep Links
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await hydrate();
+    setRefreshing(false);
+  }, [hydrate]);
+
   useEffect(() => {
     const activeId = params.activate as string;
     if (activeId) {
       activateVipOnClient(activeId).then((success) => {
         if (success) {
-          Alert.alert('✅ VIP Unlocked', 'Welcome to the premium section.');
+          Alert.alert('VIP Unlocked', 'Welcome to the premium section.');
         }
       });
     }
@@ -42,16 +49,16 @@ export default function VIP() {
     const code = manualCode.trim().toUpperCase();
     const success = await activateVipOnClient(code);
     if (success) {
-      Alert.alert('✅ Access Granted', 'VIP section is now unlocked.');
+      Alert.alert('Access Granted', 'VIP section is now unlocked.');
     } else {
       Alert.alert(
-        '❌ Access Denied',
+        'Access Denied',
         'This code is not authorized. Please ensure payment is made and admin has activated your ID.'
       );
     }
   };
 
-  if (isLoading) {
+  if (isLoading && !refreshing) {
     return (
       <Container className="items-center justify-center bg-slate-50">
         <ActivityIndicator size="large" color="#df8d38" />
@@ -64,7 +71,17 @@ export default function VIP() {
 
   if (clientIsVip) {
     return (
-      <KeyboardAwareScreen className="bg-slate-50" contentClassName="px-4 pt-6">
+      <KeyboardAwareScreen
+        className="bg-slate-50"
+        contentClassName="px-4 pt-6"
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#fbbf24"
+            colors={['#fbbf24']}
+          />
+        }>
         <View className="mb-8 flex-row items-center justify-between rounded-[44px] bg-navy-950 p-8 shadow-2xl">
           <View>
             <Text className="text-2xl font-black uppercase tracking-tighter text-gold-400">
@@ -197,7 +214,7 @@ export default function VIP() {
         </View>
       </View>
 
-      {/* FAIL-SAFE: Manual Unlock for Link Issues */}
+      {/* Manual Unlock */}
       {!showManualInput ? (
         <TouchableOpacity
           onPress={() => setShowManualInput(true)}

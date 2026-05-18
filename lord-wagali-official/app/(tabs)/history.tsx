@@ -1,5 +1,12 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  RefreshControl,
+} from 'react-native';
 import { Container } from '@/components/Container';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -7,23 +14,72 @@ import { useTips } from '@/context/TipsContext';
 
 export default function History() {
   const router = useRouter();
-  const { history, isLoading } = useTips();
+  const { history, isLoading, hydrate } = useTips();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await hydrate();
+    setRefreshing(false);
+  }, [hydrate]);
+
+  const wins = history.filter((h) => h.status === 'won').length;
+  const losses = history.filter((h) => h.status === 'lost').length;
+  const total = history.length;
+  const winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
 
   return (
     <Container className="bg-slate-50">
-      <ScrollView className="flex-1 px-4 pt-6" showsVerticalScrollIndicator={false}>
-        <View className="mb-8 flex-row items-center">
-          <TouchableOpacity
-            onPress={() => router.back()}
-            className="mr-3 rounded-full border border-slate-200 bg-white p-2.5 shadow-sm">
-            <Ionicons name="arrow-back" size={20} color="#001f3f" />
-          </TouchableOpacity>
-          <Text className="text-3xl font-black uppercase tracking-tight tracking-tighter text-navy-950">
-            Match History
-          </Text>
-        </View>
+      <ScrollView
+        className="flex-1 px-4 pt-6"
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#fbbf24"
+            colors={['#fbbf24']}
+          />
+        }>
+        <Text className="mb-6 px-2 text-3xl font-black uppercase tracking-tighter text-navy-950">
+          Match History
+        </Text>
 
-        {isLoading ? (
+        {/* Win Rate Stats Bar */}
+        {total > 0 && (
+          <View className="mb-8 rounded-[36px] border border-slate-200 bg-white p-6 shadow-lg">
+            <View className="mb-4 flex-row items-center justify-between">
+              <View className="flex-row items-center">
+                <Ionicons name="stats-chart" size={18} color="#fbbf24" />
+                <Text className="ml-2 text-xs font-black uppercase tracking-widest text-navy-950">
+                  Accuracy
+                </Text>
+              </View>
+              <Text className="text-2xl font-black tracking-tighter text-gold-500">
+                {winRate}%
+              </Text>
+            </View>
+            <View className="mb-3 h-3 overflow-hidden rounded-full bg-slate-100">
+              <View
+                style={{ width: `${winRate}%` }}
+                className="h-full rounded-full bg-green-500"
+              />
+            </View>
+            <View className="flex-row justify-between">
+              <Text className="text-[10px] font-black uppercase tracking-widest text-green-600">
+                {wins}W
+              </Text>
+              <Text className="text-[10px] font-black uppercase tracking-widest text-red-500">
+                {losses}L
+              </Text>
+              <Text className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                {total} Total
+              </Text>
+            </View>
+          </View>
+        )}
+
+        {isLoading && !refreshing ? (
           <View className="items-center justify-center py-20">
             <ActivityIndicator size="large" color="#df8d38" />
             <Text className="mt-4 text-xs font-bold uppercase tracking-widest text-slate-400">

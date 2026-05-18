@@ -56,6 +56,7 @@ interface TipsContextType {
   clientUserId: string;
   clientIsVip: boolean;
   isLoading: boolean;
+  hydrate: () => Promise<void>;
   addFreeTip: (tip: Omit<Tip, 'id'>) => Promise<void>;
   removeFreeTip: (id: string) => Promise<void>;
   addVipTip: (tip: Omit<Tip, 'id'>) => Promise<void>;

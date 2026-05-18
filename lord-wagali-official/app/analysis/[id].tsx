@@ -5,7 +5,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTips } from '@/context/TipsContext';
-import { getTeamLogo } from '../index';
+import { getTeamLogo } from '../(tabs)/index';
 
 export default function Analysis() {
   const router = useRouter();
