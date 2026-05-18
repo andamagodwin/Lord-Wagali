@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useTips } from '@/context/TipsContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { DOWNLOAD_LINK } from '@/lib/constants';
+import { apiRequest } from '@/lib/api';
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -23,6 +23,32 @@ export default function AdminDashboard() {
   const [pass, setPass] = useState('');
   const [userIdInput, setUserIdInput] = useState('');
   const [view, setView] = useState('main');
+  const [downloadUrl, setDownloadUrl] = useState('');
+  const [latestVersion, setLatestVersion] = useState('');
+
+  useEffect(() => {
+    if (isAdmin) {
+      apiRequest<{ downloadUrl: string; latestVersion: string }>('/api/v1/config', { admin: true })
+        .then((config) => {
+          setDownloadUrl(config.downloadUrl);
+          setLatestVersion(config.latestVersion);
+        })
+        .catch(() => {});
+    }
+  }, [isAdmin]);
+
+  const updateConfig = async () => {
+    try {
+      await apiRequest('/api/v1/config', {
+        method: 'PUT',
+        admin: true,
+        body: JSON.stringify({ downloadUrl, latestVersion }),
+      });
+      Alert.alert('Saved', 'App config updated. Users will see the update prompt.');
+    } catch {
+      Alert.alert('Error', 'Failed to update config.');
+    }
+  };
 
   const handleLogin = () => {
     if (pass === '9090') {
@@ -250,18 +276,41 @@ export default function AdminDashboard() {
             />
           </View>
 
-          {/* Download Link */}
+          {/* App Config */}
           <View className="mt-6 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-            <Text className="mb-3 text-sm font-bold text-navy-950">Share Download Link</Text>
-            <Button
-              title="COPY & SHARE"
-              variant="primary"
+            <Text className="mb-3 text-sm font-bold text-navy-950">App Config</Text>
+            <Text className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+              Download URL
+            </Text>
+            <TextInput
+              className="mb-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-medium text-navy-950"
+              placeholder="https://mediafire.com/..."
+              placeholderTextColor="#94a3b8"
+              value={downloadUrl}
+              onChangeText={setDownloadUrl}
+              autoCapitalize="none"
+            />
+            <Text className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+              Latest Version
+            </Text>
+            <TextInput
+              className="mb-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-center text-base font-bold text-navy-950"
+              placeholder="1.0.0"
+              placeholderTextColor="#94a3b8"
+              value={latestVersion}
+              onChangeText={setLatestVersion}
+              keyboardType="numeric"
+            />
+            <Button title="SAVE CONFIG" variant="primary" onPress={updateConfig} />
+            <TouchableOpacity
               onPress={() =>
                 Share.share({
-                  message: `Download ElitePicks: ${DOWNLOAD_LINK}`,
+                  message: `Download ElitePicks: ${downloadUrl}`,
                 })
               }
-            />
+              className="mt-3 items-center rounded-xl bg-slate-50 p-3">
+              <Text className="text-xs font-bold text-navy-950">Share Download Link</Text>
+            </TouchableOpacity>
           </View>
 
           {/* Reset */}

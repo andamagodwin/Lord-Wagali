@@ -8,6 +8,7 @@ import { healthRouter } from './routes/health';
 import { tipsRouter } from './routes/tips';
 import { accessRouter } from './routes/access';
 import { adminRouter } from './routes/admin';
+import { configRouter } from './routes/config';
 import { errorHandler, notFoundHandler } from './middleware/error';
 
 export function createApp() {
@@ -39,6 +40,7 @@ export function createApp() {
   app.use('/api/v1/tips', tipsRouter);
   app.use('/api/v1/access', accessRouter);
   app.use('/api/v1/admin', adminRouter);
+  app.use('/api/v1/config', configRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

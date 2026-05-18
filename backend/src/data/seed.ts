@@ -179,3 +179,8 @@ export const seedMatches: Prisma.MatchCreateManyInput[] = [
 ];
 
 export const defaultAccessIds = ['AW-9090'];
+
+export const defaultAppConfig = [
+  { key: 'download_url', value: 'https://www.mediafire.com/folder/lvoiimmjhifd9/AlphaWins' },
+  { key: 'latest_version', value: '1.0.0' },
+];
