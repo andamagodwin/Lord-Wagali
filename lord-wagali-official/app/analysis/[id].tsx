@@ -107,8 +107,8 @@ export default function Analysis() {
             <View className="mb-6 flex-row items-center justify-between">
               <View className="flex-1 items-center">
                 <Image
-                  source={getTeamLogo(match.homeLogo)}
-                  className="mb-2 h-14 w-14"
+                  source={{ uri: getTeamLogo(match.homeLogo) }}
+                  style={{ width: 56, height: 56, marginBottom: 8 }}
                   contentFit="contain"
                 />
                 <Text
@@ -122,8 +122,8 @@ export default function Analysis() {
               </View>
               <View className="flex-1 items-center">
                 <Image
-                  source={getTeamLogo(match.awayLogo)}
-                  className="mb-2 h-14 w-14"
+                  source={{ uri: getTeamLogo(match.awayLogo) }}
+                  style={{ width: 56, height: 56, marginBottom: 8 }}
                   contentFit="contain"
                 />
                 <Text

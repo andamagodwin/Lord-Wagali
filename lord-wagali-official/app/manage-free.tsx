@@ -108,14 +108,27 @@ export default function ManageFree() {
               <View
                 key={item.id}
                 className="mb-3 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-                <View className="mb-3 flex-row items-start justify-between">
-                  <View className="mr-3 flex-1">
-                    <Text className="text-sm font-bold text-navy-950">
-                      {item.home} vs {item.away}
-                    </Text>
-                    <Text className="mt-0.5 text-[10px] text-slate-400">
-                      {item.league} • {item.time} • {item.tip} @{item.odds}
-                    </Text>
+                <View className="mb-3 flex-row items-center justify-between">
+                  <View className="mr-3 flex-1 flex-row items-center">
+                    <Image
+                      source={{ uri: getTeamLogo(item.homeLogo) }}
+                      style={{ width: 24, height: 24 }}
+                      contentFit="contain"
+                    />
+                    <Text className="mx-1.5 text-[10px] text-slate-300">vs</Text>
+                    <Image
+                      source={{ uri: getTeamLogo(item.awayLogo) }}
+                      style={{ width: 24, height: 24 }}
+                      contentFit="contain"
+                    />
+                    <View className="ml-3 flex-1">
+                      <Text className="text-sm font-bold text-navy-950" numberOfLines={1}>
+                        {item.home} vs {item.away}
+                      </Text>
+                      <Text className="mt-0.5 text-[10px] text-slate-400">
+                        {item.league} • {item.time} • {item.tip} @{item.odds}
+                      </Text>
+                    </View>
                   </View>
                   <TouchableOpacity
                     onPress={() => removeFreeTip(item.id)}

@@ -52,10 +52,10 @@ export default function Home() {
               <TouchableOpacity
                 activeOpacity={1}
                 onLongPress={() => router.push('/admin')}
-                className="h-11 w-11 overflow-hidden rounded-xl border border-white/20">
+                style={{ width: 44, height: 44, borderRadius: 12, overflow: 'hidden' }}>
                 <Image
-                  source={require('@/assets/img_1778617166715_015o.jpg')}
-                  className="h-full w-full"
+                  source={require('@/assets/elitepicks-logo.png')}
+                  style={{ width: 44, height: 44 }}
                   contentFit="cover"
                 />
               </TouchableOpacity>
@@ -151,11 +151,11 @@ export default function Home() {
                 <View className="mb-4 flex-row items-center">
                   <View className="flex-1 flex-row items-center">
                     <Image
-                      source={getTeamLogo(item.homeLogo)}
-                      className="mr-2 h-10 w-10"
+                      source={{ uri: getTeamLogo(item.homeLogo) }}
+                      style={{ width: 36, height: 36 }}
                       contentFit="contain"
                     />
-                    <Text className="flex-1 text-sm font-bold text-navy-950" numberOfLines={1}>
+                    <Text className="ml-2 flex-1 text-sm font-bold text-navy-950" numberOfLines={1}>
                       {item.home}
                     </Text>
                   </View>
@@ -168,12 +168,12 @@ export default function Home() {
 
                   <View className="flex-1 flex-row-reverse items-center">
                     <Image
-                      source={getTeamLogo(item.awayLogo)}
-                      className="ml-2 h-10 w-10"
+                      source={{ uri: getTeamLogo(item.awayLogo) }}
+                      style={{ width: 36, height: 36 }}
                       contentFit="contain"
                     />
                     <Text
-                      className="flex-1 text-right text-sm font-bold text-navy-950"
+                      className="mr-2 flex-1 text-right text-sm font-bold text-navy-950"
                       numberOfLines={1}>
                       {item.away}
                     </Text>
