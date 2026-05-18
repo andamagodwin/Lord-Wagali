@@ -498,12 +498,16 @@ export const useTipsStore = create<TipsStore>((set, get) => ({
   },
   activateVipOnClient: async (userIdInput) => {
     const cleanId = userIdInput.trim().toUpperCase();
+    const myDeviceId = get().clientUserId;
     try {
       const response = await apiRequest<{ deviceId: string; isVip: boolean }>(
         '/api/v1/access/activate',
         {
           method: 'POST',
-          body: JSON.stringify({ deviceId: cleanId }),
+          body: JSON.stringify({
+            deviceId: cleanId,
+            requestingDeviceId: myDeviceId,
+          }),
         }
       );
 

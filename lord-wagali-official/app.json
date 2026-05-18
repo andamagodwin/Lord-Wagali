@@ -26,13 +26,13 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#08111f"
+      "backgroundColor": "#18152e"
     },
     "assetBundlePatterns": ["**/*"],
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#08111f"
+        "backgroundColor": "#18152e"
       },
       "package": "com.elitepicks.app"
     },
