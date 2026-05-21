@@ -238,7 +238,9 @@ export default function AdminDashboard() {
               Admin Session
             </Text>
           </View>
-          <TouchableOpacity onPress={() => setIsAdmin(false)} className="rounded-lg bg-red-500/20 p-2">
+          <TouchableOpacity
+            onPress={() => setIsAdmin(false)}
+            className="rounded-lg bg-red-500/20 p-2">
             <Ionicons name="power" size={20} color="#ef4444" />
           </TouchableOpacity>
         </View>
@@ -272,7 +274,7 @@ export default function AdminDashboard() {
               title="Results"
               icon="time"
               bg="bg-white"
-              onPress={() => router.push('/(tabs)/history')}
+              onPress={() => router.push('/history')}
             />
           </View>
 
@@ -299,7 +301,7 @@ export default function AdminDashboard() {
               placeholderTextColor="#94a3b8"
               value={latestVersion}
               onChangeText={setLatestVersion}
-              keyboardType="numeric"
+              keyboardType="default"
             />
             <Button title="SAVE CONFIG" variant="primary" onPress={updateConfig} />
             <TouchableOpacity
@@ -336,10 +338,7 @@ function AdminCard({
 }) {
   const isDark = bg === 'bg-navy-950' || bg === 'bg-gold-500';
   return (
-    <TouchableOpacity
-      onPress={onPress}
-      activeOpacity={0.7}
-      className="w-[47%]">
+    <TouchableOpacity onPress={onPress} activeOpacity={0.7} className="w-[47%]">
       <View
         className={`${bg} h-32 items-center justify-center rounded-2xl ${isDark ? '' : 'border border-slate-100'} shadow-sm`}>
         <Ionicons

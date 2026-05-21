@@ -500,14 +500,19 @@ export const useTipsStore = create<TipsStore>((set, get) => ({
     const cleanId = userIdInput.trim().toUpperCase();
     const myDeviceId = get().clientUserId;
     try {
+      const payload: { deviceId: string; requestingDeviceId?: string } = {
+        deviceId: cleanId,
+      };
+
+      if (myDeviceId) {
+        payload.requestingDeviceId = myDeviceId;
+      }
+
       const response = await apiRequest<{ deviceId: string; isVip: boolean }>(
         '/api/v1/access/activate',
         {
           method: 'POST',
-          body: JSON.stringify({
-            deviceId: cleanId,
-            requestingDeviceId: myDeviceId,
-          }),
+          body: JSON.stringify(payload),
         }
       );
 

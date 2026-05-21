@@ -22,11 +22,11 @@ import { WHATSAPP_NUMBER, PAYMENT_NUMBER } from '@/lib/constants';
 export default function VIP() {
   const params = useLocalSearchParams();
 
-  const { vipTips, clientUserId, clientIsVip, activateVipOnClient, isLoading, hydrate } =
-    useTips();
+  const { vipTips, clientUserId, clientIsVip, activateVipOnClient, isLoading, hydrate } = useTips();
   const [manualCode, setManualCode] = useState('');
   const [showManualInput, setShowManualInput] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [activating, setActivating] = useState(false);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -37,28 +37,48 @@ export default function VIP() {
   useEffect(() => {
     const activeId = params.activate as string;
     if (activeId) {
-      activateVipOnClient(activeId).then((success) => {
-        if (success) {
-          Alert.alert('VIP Unlocked', 'Welcome to the premium section.');
-        }
-      });
+      setActivating(true);
+      activateVipOnClient(activeId)
+        .then((success) => {
+          if (success) {
+            Alert.alert('VIP Unlocked', 'Welcome to the premium section.');
+          }
+        })
+        .catch(() => {
+          Alert.alert('Access Denied', 'Activation failed. Please try again.');
+        })
+        .finally(() => {
+          setActivating(false);
+        });
     }
   }, [params.activate, activateVipOnClient]);
 
   const handleManualUnlock = async () => {
     const code = manualCode.trim().toUpperCase();
-    const success = await activateVipOnClient(code);
-    if (success) {
-      Alert.alert('Access Granted', 'VIP section is now unlocked.');
-    } else {
-      Alert.alert(
-        'Access Denied',
-        'This code is not authorized. Please ensure payment is made and admin has activated your ID.'
-      );
+    if (!code) {
+      Alert.alert('Missing Code', 'Please enter your activation code.');
+      return;
+    }
+
+    try {
+      setActivating(true);
+      const success = await activateVipOnClient(code);
+      if (success) {
+        Alert.alert('Access Granted', 'VIP section is now unlocked.');
+      } else {
+        Alert.alert(
+          'Access Denied',
+          'This code is not authorized. Please ensure payment is made and admin has activated your ID.'
+        );
+      }
+    } catch {
+      Alert.alert('Activation Error', 'Could not verify the code right now. Please retry.');
+    } finally {
+      setActivating(false);
     }
   };
 
-  if (isLoading && !refreshing) {
+  if ((isLoading || activating) && !refreshing) {
     return (
       <View className="flex-1 items-center justify-center bg-slate-50">
         <ActivityIndicator size="large" color="#18152e" />
@@ -155,23 +175,21 @@ export default function VIP() {
 
   // Non-VIP: Payment & Activation flow
   return (
-      <View className="flex-1 bg-slate-50">
-        <SafeAreaView edges={['top']} className="bg-[#18152e]">
-          <View className="items-center px-5 pb-5 pt-3">
-            <Text className="text-lg font-black tracking-tight text-white">VIP Access</Text>
-            <Text className="mt-0.5 text-[10px] font-medium text-gold-400">
-              Premium Predictions
-            </Text>
-          </View>
-        </SafeAreaView>
+    <View className="flex-1 bg-slate-50">
+      <SafeAreaView edges={['top']} className="bg-[#18152e]">
+        <View className="items-center px-5 pb-5 pt-3">
+          <Text className="text-lg font-black tracking-tight text-white">VIP Access</Text>
+          <Text className="mt-0.5 text-[10px] font-medium text-gold-400">Premium Predictions</Text>
+        </View>
+      </SafeAreaView>
 
-        <ScrollView
-          className="flex-1"
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 40 }}
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode="interactive"
-          automaticallyAdjustKeyboardInsets>
+      <ScrollView
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 40 }}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
+        automaticallyAdjustKeyboardInsets>
         <View className="px-5 pt-6">
           {/* Step 1: Payment */}
           <View className="mb-5 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
@@ -261,8 +279,8 @@ export default function VIP() {
             )}
           </View>
         </View>
-        </ScrollView>
-      </View>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -289,7 +307,8 @@ function VIPMatchCard({
     <View className="mb-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
       <View className="mb-4 flex-row items-center justify-between">
         <Text className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-          {league ? `${league} • ` : ''}{time}
+          {league ? `${league} • ` : ''}
+          {time}
         </Text>
         <View className="rounded-md bg-green-50 px-2 py-0.5">
           <Text className="text-[9px] font-bold uppercase text-green-700">VIP Pick</Text>

@@ -90,7 +90,7 @@ export default function Home() {
         }>
         {/* VIP Access Banner */}
         <TouchableOpacity
-          onPress={() => router.push('/(tabs)/vip')}
+          onPress={() => router.push('/vip')}
           activeOpacity={0.85}
           className="mx-5 mt-5 flex-row items-center justify-between rounded-2xl bg-gold-500 p-5">
           <View className="flex-1">
@@ -109,8 +109,8 @@ export default function Home() {
         {/* Free Tips Section */}
         <View className="mt-8 px-5">
           <View className="mb-5 flex-row items-center justify-between">
-            <Text className="text-lg font-black text-navy-950">Today's Free Tips</Text>
-            <TouchableOpacity onPress={() => router.push('/(tabs)/history')}>
+            <Text className="text-lg font-black text-navy-950">Today&apos;s Free Tips</Text>
+            <TouchableOpacity onPress={() => router.push('/history')}>
               <Text className="text-xs font-bold text-coral-500">See Results</Text>
             </TouchableOpacity>
           </View>
@@ -127,7 +127,7 @@ export default function Home() {
               <Ionicons name="football-outline" size={40} color="#cbd5e1" />
               <Text className="mt-4 text-base font-bold text-navy-950">No Active Tips</Text>
               <Text className="mt-1 text-center text-xs text-slate-400">
-                We're analyzing today's fixtures. Check back shortly.
+                We&apos;re analyzing today&apos;s fixtures. Check back shortly.
               </Text>
             </View>
           ) : (
@@ -161,9 +161,7 @@ export default function Home() {
                   </View>
 
                   <View className="mx-3 rounded-lg bg-coral-500 px-3 py-1.5">
-                    <Text className="text-[10px] font-black uppercase text-white">
-                      {item.tip}
-                    </Text>
+                    <Text className="text-[10px] font-black uppercase text-white">{item.tip}</Text>
                   </View>
 
                   <View className="flex-1 flex-row-reverse items-center">
