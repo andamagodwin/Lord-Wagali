@@ -78,7 +78,7 @@ export default function VIP() {
     }
   };
 
-  if ((isLoading || activating) && !refreshing) {
+  if (isLoading && !activating && !refreshing) {
     return (
       <View className="flex-1 items-center justify-center bg-slate-50">
         <ActivityIndicator size="large" color="#18152e" />
@@ -268,13 +268,23 @@ export default function VIP() {
                   autoCapitalize="characters"
                   value={manualCode}
                   onChangeText={setManualCode}
+                  editable={!activating}
                 />
-                <Button title="UNLOCK VIP" variant="primary" onPress={handleManualUnlock} />
-                <TouchableOpacity
-                  onPress={() => setShowManualInput(false)}
-                  className="mt-3 items-center py-2">
-                  <Text className="text-xs font-medium text-slate-400">Cancel</Text>
-                </TouchableOpacity>
+                {activating ? (
+                  <View className="items-center rounded-xl bg-navy-950 p-4">
+                    <ActivityIndicator size="small" color="#fbbf24" />
+                    <Text className="mt-2 text-xs font-medium text-white">Verifying code...</Text>
+                  </View>
+                ) : (
+                  <Button title="UNLOCK VIP" variant="primary" onPress={handleManualUnlock} />
+                )}
+                {!activating && (
+                  <TouchableOpacity
+                    onPress={() => setShowManualInput(false)}
+                    className="mt-3 items-center py-2">
+                    <Text className="text-xs font-medium text-slate-400">Cancel</Text>
+                  </TouchableOpacity>
+                )}
               </View>
             )}
           </View>

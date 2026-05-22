@@ -25,6 +25,8 @@ export default function AdminDashboard() {
   const [view, setView] = useState('main');
   const [downloadUrl, setDownloadUrl] = useState('');
   const [latestVersion, setLatestVersion] = useState('');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [hasHydrated, setHasHydrated] = useState(false);
 
   useEffect(() => {
     if (isAdmin) {
@@ -101,7 +103,13 @@ export default function AdminDashboard() {
     ]);
   };
 
-  if (isLoading) {
+  useEffect(() => {
+    if (!isLoading && !hasHydrated) {
+      setHasHydrated(true);
+    }
+  }, [isLoading, hasHydrated]);
+
+  if (isLoading && !hasHydrated) {
     return (
       <View className="flex-1 items-center justify-center bg-slate-50">
         <ActivityIndicator size="large" color="#18152e" />
@@ -203,11 +211,25 @@ export default function AdminDashboard() {
                     <Text className="text-[9px] font-medium text-green-600">Active</Text>
                   </View>
                   <View className="flex-row items-center gap-x-2">
-                    <TouchableOpacity
-                      onPress={() => deauthorizeUserId(id)}
-                      className="rounded-lg bg-red-50 p-2">
-                      <Ionicons name="trash-outline" size={16} color="#ef4444" />
-                    </TouchableOpacity>
+                    {deletingId === id ? (
+                      <View className="rounded-lg bg-red-50 p-2">
+                        <ActivityIndicator size={16} color="#ef4444" />
+                      </View>
+                    ) : (
+                      <TouchableOpacity
+                        onPress={async () => {
+                          setDeletingId(id);
+                          try {
+                            await deauthorizeUserId(id);
+                          } finally {
+                            setDeletingId(null);
+                          }
+                        }}
+                        disabled={deletingId !== null}
+                        className="rounded-lg bg-red-50 p-2">
+                        <Ionicons name="trash-outline" size={16} color="#ef4444" />
+                      </TouchableOpacity>
+                    )}
                     <TouchableOpacity
                       onPress={() =>
                         Share.share({
